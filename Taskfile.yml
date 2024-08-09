@@ -1,0 +1,34 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    deps:
+      - task: fmt
+      - task: lint
+      - task: test
+  check:
+    deps:
+      - task: test
+      - task: lint
+  test:
+    cmds:
+      - echo 'Update here'
+  fmt:
+    cmds:
+      - dprint fmt
+      - git ls-files '*.nix' | xargs nix fmt
+  lint:
+    cmds:
+      - dprint check
+      - typos . .github .vscode
+      # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
+      - git ls-files '*.nix' | xargs nixfmt --check
+  deps:
+    cmds:
+      - nix --version
+      - nil --version
+      - task --version
+      - dprint --version
+      - typos --version

@@ -40,6 +40,12 @@
 
                 dprint
                 typos
+
+                rustc
+                cargo
+                rustfmt
+                rust-analyzer
+                clippy
               ];
             };
         }

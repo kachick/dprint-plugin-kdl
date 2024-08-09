@@ -4,13 +4,6 @@ fn main() {
 
 use serde::Serialize;
 
-#[derive(Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Configuration {
-  // add configuration properties here...
-  line_width: u32, // for example
-}
-
 use anyhow::Result;
 use dprint_core::configuration::get_unknown_property_diagnostics;
 use dprint_core::configuration::get_value;
@@ -18,11 +11,19 @@ use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::ResolveConfigurationResult;
 use dprint_core::generate_plugin_code;
-use·dprint_core::plugins::PluginInfo;
+use dprint_core::plugins::PluginInfo;
 use dprint_core::plugins::SyncPluginHandler;
 use std::path::Path;
 
-use crate::configuration::Configuration; // import the Configuration from above
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Configuration {
+  // add configuration properties here...
+  line_width: u32, // for example
+}
+
+
+// use crate::configuration::Configuration; // import the Configuration from above
 
 #[derive(Default)]
 pub struct KdlPluginHandler;

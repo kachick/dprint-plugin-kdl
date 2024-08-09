@@ -61,6 +61,7 @@ dependencies = [
 name = "dprint-plugin-kdl"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dprint-core",
  "serde",
  "serde_json",

@@ -7,12 +7,18 @@ on:
       - '.github/workflows/ci-nix.yml'
       - '**.nix'
       - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'example'
       - 'Taskfile.yml'
   pull_request:
     paths:
       - '.github/workflows/ci-nix.yml'
       - '**.nix'
       - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'example'
       - 'Taskfile.yml'
   schedule:
     # Every 10:42 JST
@@ -21,21 +27,62 @@ on:
   workflow_dispatch:
 
 jobs:
-  tasks:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-24.04
-          # - macos-14
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # outputs:
+    #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@ab6bcb2d5af0e904d04aea750e2089e9dc4cbfdd # v13
+      - uses: DeterminateSystems/magic-nix-cache-action@b46e247b898aa56e6d2d2e728dc6df6c84fdb738 # v7
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix flake check
       - run: nix flake show
       - run: nix develop --command task deps
-      - run: nix develop --command task check
-    # - run: nix run . -- --version
+      - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+      - run: nix develop --command task
+      - name: Upload WASM file as an artifact
+        # id: upload
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        with:
+          name: 'plugins'
+          path: 'target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm'
+  check:
+    strategy:
+      fail-fast: false
+      # Syntax https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+      matrix:
+        # Due to https://github.com/actions/runner/issues/849, we have to use quotes for 'n.0'
+        dprint-version: [
+          '', # empty means to latest: https://github.com/dprint/check/blob/2f1cf31537886c3bfb05591c031f7744e48ba8a1/action.yml#L8
+          '0.45.1', # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
+        ]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dprint/check@2f1cf31537886c3bfb05591c031f7744e48ba8a1 # v2.2
+        with:
+          dprint-version: '${{ matrix.dprint-version }}'
+      - name: Make sure dprint status
+        run: |
+          dprint --version
+          dprint output-file-paths
+      - name: Install WASM plugin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download
+          tree
+          dprint config add "file:${PWD}/plugins/dprint_plugin_kdl.wasm"
+      - run: dprint output-file-paths | grep -F '.kdl'
+      - run: dprint check
+        id: dprint-check
+        continue-on-error: true
+      - run: false
+        if: steps.dprint-check.outcome == 'success'
+      - run: |
+          dprint fmt
+          diff ./example/zellij-config.wrong.kdl ./example/zellij-config.expected.kdl

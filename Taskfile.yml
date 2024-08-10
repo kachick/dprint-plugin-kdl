@@ -5,9 +5,8 @@ version: '3'
 tasks:
   default:
     deps:
-      - task: fmt
-      - task: lint
-      - task: test
+      - task: check
+      - task: build
   build:
     - cargo build --release --target=wasm32-unknown-unknown
   check:

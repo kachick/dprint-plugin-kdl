@@ -3,7 +3,9 @@ name: ❄️
 on:
   push:
     tags:
-      - 'v*'
+      # Do not add v prefix: https://github.com/dprint/plugins/blob/75a3755b8734eee294214a7d7efc18145668a99f/README.md?plain=1#L27
+      # https://github.com/actions/runner/issues/1699#issuecomment-1046796067
+      - '[0-9]+.[0-9]+.[0-9]+'
     branches: [main]
     paths:
       - '.github/workflows/nix.yml'

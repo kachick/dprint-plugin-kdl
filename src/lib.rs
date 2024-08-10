@@ -39,22 +39,9 @@ pub fn format_text(file_path: &Path, text: &str, config: &Configuration) -> Resu
 fn format_text_inner(_file_path: &Path, text: &str, _config: &Configuration) -> Result<String> {
     let text = strip_bom(text);
 
-    // let input = read_stdin().map_err(KdlFmtError::ReadStdinError)?;
-
     let parsed = parse_kdl(&text)?;
 
     let formatted = format_kdl(parsed);
-
-    // println!("{formatted}");
-
-    // let k = parse_kdl(text));
-    // Ok(format_kdl(parse_kdl(text)))
-    // let node = parse_and_process_node(file_path, text, config)?;
-
-    // Ok(dprint_core::formatting::format(
-    //     || generate(node, text, config),
-    //     PrintOptions(),
-    // ))
 
     Ok(formatted)
 }
@@ -67,8 +54,6 @@ fn strip_bom(text: &str) -> &str {
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {}
 
-// use crate::configuration::Configuration; // import the Configuration from above
-
 #[derive(Default)]
 pub struct KdlPluginHandler;
 
@@ -78,21 +63,22 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             info: PluginInfo {
                 name: env!("CARGO_PKG_NAME").to_string(),
                 version: env!("CARGO_PKG_VERSION").to_string(),
-                config_key: "keyGoesHere".to_string(),
-                help_url: "".to_string(),          // fill this in
+                config_key: "kdl".to_string(),
+                help_url: "https://github.com/kachick/dprint-plugin-kdl".to_string(), // fill this in
                 config_schema_url: "".to_string(), // leave this empty for now
                 update_url: None,                  // leave this empty for now
             },
             file_matching: FileMatchingInfo {
-                // these can be derived from the config
-                file_extensions: vec!["txt".to_string()],
+                file_extensions: vec!["kdl".to_string()],
                 file_names: vec![],
             },
         }
     }
 
     fn license_text(&mut self) -> String {
-        "License text goes here.".to_string()
+        std::str::from_utf8(include_bytes!("../LICENSE"))
+            .unwrap()
+            .into()
     }
 
     fn resolve_config(

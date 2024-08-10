@@ -96,6 +96,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      # Required to checkout for gh command
+      - uses: actions/checkout@v4
       - run: |
           gh run download
           tree

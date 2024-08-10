@@ -46,7 +46,7 @@ jobs:
         # id: upload
         uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
         with:
-          name: 'dprint_plugin_kdl.wasm'
+          name: 'plugins'
           path: 'target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm'
   check:
     runs-on: ubuntu-24.04
@@ -63,8 +63,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh run download
-          ls -alh dprint*
-          dprint config add "file:${PWD}/dprint_plugin_kdl.wasm"
+          tree
+          dprint config add "file:${PWD}/plugins/dprint_plugin_kdl.wasm"
       - run: dprint output-file-paths | grep -F '.kdl'
       - run: dprint check
         id: dprint-check

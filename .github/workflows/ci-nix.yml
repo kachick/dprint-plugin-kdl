@@ -49,6 +49,15 @@ jobs:
           name: 'plugins'
           path: 'target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm'
   check:
+    strategy:
+      fail-fast: false
+      # Syntax https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+      matrix:
+        # Due to https://github.com/actions/runner/issues/849, we have to use quotes for 'n.0'
+        dprint-version: [
+          '', # empty means to latest: https://github.com/dprint/check/blob/2f1cf31537886c3bfb05591c031f7744e48ba8a1/action.yml#L8
+          '0.45.1', # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
+        ]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: [build]
@@ -56,8 +65,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dprint/check@2f1cf31537886c3bfb05591c031f7744e48ba8a1 # v2.2
         with:
-          # TODO: Includes latest to test target
-          dprint-version: '0.45.1' # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
+          dprint-version: '${{ matrix.dprint-version }}'
+      - name: Make sure dprint status
+        run:
+          dprint --version
+          dprint output-file-paths
       - name: Install WASM plugin
         env:
           GH_TOKEN: ${{ github.token }}

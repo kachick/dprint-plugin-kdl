@@ -62,10 +62,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download ${{ github.event.workflow.run.id }}
-          ls -alh
-          unzip ${{ github.event.workflow.run.id }}
-          dprint config add "file:${PWD}/${{ github.event.workflow.run.id }}/dprint_plugin_kdl.wasm"
+          gh run download
+          ls -alh dprint*
+          dprint config add "file:${PWD}/dprint_plugin_kdl.wasm"
       - run: dprint output-file-paths | grep -F '.kdl'
       - run: dprint check
         id: dprint-check

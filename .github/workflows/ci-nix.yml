@@ -40,7 +40,7 @@ jobs:
       - run: nix flake check
       - run: nix flake show
       - run: nix develop --command task deps
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
       - run: nix develop --command task
       - name: Upload WASM file as an artifact
         # id: upload

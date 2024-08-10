@@ -42,10 +42,21 @@
                 typos
 
                 rustc
+                # rustc.llvmPackages.lld
+                rustc-wasm32
+                # rustc-wasm32.llvmPackages.lld
                 cargo
                 rustfmt
                 rust-analyzer
                 clippy
+              ];
+
+              # FIXME: error: linker `rust-lld` not found
+              # https://github.com/NixOS/nixpkgs/issues/70238
+              nativeBuildInputs = [
+                rustc.llvmPackages.lld
+                # rustc-wasm32
+                rustc-wasm32.llvmPackages.lld
               ];
             };
         }

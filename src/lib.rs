@@ -122,4 +122,4 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
 }
 
 #[cfg(target_arch = "wasm32")]
-generate_plugin_code!(KdlPluginHandler, KdlPluginHandler::default());
+generate_plugin_code!(KdlPluginHandler, KdlPluginHandler);

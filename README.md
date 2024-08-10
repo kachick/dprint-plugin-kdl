@@ -6,15 +6,11 @@
 
 ## Installation
 
-TODO: Make it possible to be installed from GitHub Releases
-
 ```bash
-nix develop
-task build
-dprint config add "file:${PWD}/target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm"
+dprint config add 'https://github.com/kachick/dprint-plugin-kdl/releases/download/0.1.0/plugin.wasm'
 ```
 
-Currently there are no config options, all features are delegated to [upstream crate](https://github.com/kdl-org/kdl-rs).
+Currently there are no config options, all formatter features delegating to [upstream crate](https://github.com/kdl-org/kdl-rs).
 
 ## Link
 

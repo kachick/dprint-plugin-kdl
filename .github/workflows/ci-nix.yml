@@ -7,12 +7,18 @@ on:
       - '.github/workflows/ci-nix.yml'
       - '**.nix'
       - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'example'
       - 'Taskfile.yml'
   pull_request:
     paths:
       - '.github/workflows/ci-nix.yml'
       - '**.nix'
       - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'example'
       - 'Taskfile.yml'
   schedule:
     # Every 10:42 JST
@@ -37,5 +43,15 @@ jobs:
       - run: nix flake check
       - run: nix flake show
       - run: nix develop --command task deps
-      - run: nix develop --command task check
-    # - run: nix run . -- --version
+      - run: nix develop --command task
+      - run: |
+          dprint config add "file:${PWD}/target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm"
+          dprint output-file-paths | grep -F '.kdl'
+      - run: dprint check
+        id: dprint-check
+        continue-on-error: true
+      - run: false
+        if: steps.dprint-check.outcome == 'success'
+      - run: |
+          dprint fmt
+          diff ./example/zellij-config.wrong.kdl ./example/zellij-config.expected.kdl

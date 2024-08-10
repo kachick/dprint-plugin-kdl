@@ -43,8 +43,12 @@
                 clippy
               ];
 
+              nativeBuildInputs = [
+                rustc-wasm32.llvmPackages.bintools # rust-lld
+              ];
+
               # Workaround for "error: linker `rust-lld` not found".
-              # Adding packages like cargo-binutils didn't fix it!
+              # Adding packages like binutils is not enough!
               #
               # https://github.com/NixOS/nixpkgs/issues/70238
               CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";

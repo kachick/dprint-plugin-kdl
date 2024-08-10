@@ -27,15 +27,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  tasks:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-24.04
-          # - macos-14
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # outputs:
+    #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@ab6bcb2d5af0e904d04aea750e2089e9dc4cbfdd # v13
@@ -44,9 +40,29 @@ jobs:
       - run: nix flake show
       - run: nix develop --command task deps
       - run: nix develop --command task
-      - run: |
-          dprint config add "file:${PWD}/target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm"
-          dprint output-file-paths | grep -F '.kdl'
+      - name: Upload WASM file as an artifact
+        # id: upload
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        with:
+          name: 'dprint_plugin_kdl.wasm'
+          path: 'target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm'
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dprint/check@2f1cf31537886c3bfb05591c031f7744e48ba8a1 # v2.2
+        with:
+          # TODO: Includes latest to test target
+          dprint-version: '0.45.1' # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
+      - name: Install WASM plugin
+        run: |
+          gh run download ${{ github.event.workflow.run.id }}
+          ls -alh
+          unzip ${{ github.event.workflow.run.id }}
+          dprint config add "file:${PWD}/${{ github.event.workflow.run.id }}/dprint_plugin_kdl.wasm"
+      - run: dprint output-file-paths | grep -F '.kdl'
       - run: dprint check
         id: dprint-check
         continue-on-error: true

@@ -58,6 +58,8 @@ jobs:
           # TODO: Includes latest to test target
           dprint-version: '0.45.1' # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
       - name: Install WASM plugin
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh run download ${{ github.event.workflow.run.id }}
           ls -alh

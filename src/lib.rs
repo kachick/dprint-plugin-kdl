@@ -1,5 +1,4 @@
 use dprint_core::configuration::ResolveConfigurationResult;
-// use dprint_core::formatting::PrintOptions;
 use dprint_core::plugins::FileMatchingInfo;
 use dprint_core::plugins::FormatResult;
 use dprint_core::plugins::SyncPluginInfo;

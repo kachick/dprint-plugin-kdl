@@ -39,7 +39,7 @@ pub fn format_text(file_path: &Path, text: &str, config: &Configuration) -> Resu
 fn format_text_inner(_file_path: &Path, text: &str, _config: &Configuration) -> Result<String> {
     let text = strip_bom(text);
 
-    let parsed = parse_kdl(&text)?;
+    let parsed = parse_kdl(text)?;
 
     let formatted = format_kdl(parsed);
 
@@ -47,7 +47,7 @@ fn format_text_inner(_file_path: &Path, text: &str, _config: &Configuration) -> 
 }
 
 fn strip_bom(text: &str) -> &str {
-    text.strip_prefix("\u{FEFF}").unwrap_or(text)
+    text.strip_prefix('\u{FEFF}').unwrap_or(text)
 }
 
 #[derive(Clone, Serialize)]

@@ -105,4 +105,4 @@ jobs:
           tree
           mv plugins/dprint_plugin_kdl.wasm plugins/plugin.wasm
       - run: |
-          gh release create --verify-tag "$GITHUB_REF_NAME" plugins/plugin.wasm
+          gh release create --verify-tag "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" plugins/plugin.wasm

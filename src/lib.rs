@@ -1,7 +1,9 @@
-use dprint_core::configuration::ResolveConfigurationResult;
 use dprint_core::plugins::FileMatchingInfo;
 use dprint_core::plugins::FormatResult;
-use dprint_core::plugins::SyncPluginInfo;
+use dprint_core::plugins::PluginInfo;
+use dprint_core::plugins::PluginResolveConfigurationResult;
+use dprint_core::plugins::SyncFormatRequest;
+use dprint_core::plugins::SyncHostFormatRequest;
 use serde::Serialize;
 
 use anyhow::Result;
@@ -9,7 +11,6 @@ use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 #[cfg(target_arch = "wasm32")]
 use dprint_core::generate_plugin_code;
-use dprint_core::plugins::PluginInfo;
 use dprint_core::plugins::SyncPluginHandler;
 use std::path::Path;
 
@@ -57,22 +58,16 @@ pub struct Configuration {}
 pub struct KdlPluginHandler;
 
 impl SyncPluginHandler<Configuration> for KdlPluginHandler {
-    fn plugin_info(&mut self) -> SyncPluginInfo {
-        SyncPluginInfo {
-            info: PluginInfo {
-                name: env!("CARGO_PKG_NAME").to_string(),
-                version: env!("CARGO_PKG_VERSION").to_string(),
-                config_key: "kdl".to_string(),
-                help_url: "https://github.com/kachick/dprint-plugin-kdl".to_string(), // fill this in
-                config_schema_url: "".to_string(), // leave this empty for now
-                update_url: Some(
-                    "https://plugins.dprint.dev/kachick/dprint-plugin-kdl/latest.json".to_string(),
-                ),
-            },
-            file_matching: FileMatchingInfo {
-                file_extensions: vec!["kdl".to_string()],
-                file_names: vec![],
-            },
+    fn plugin_info(&mut self) -> PluginInfo {
+        PluginInfo {
+            name: env!("CARGO_PKG_NAME").to_string(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            config_key: "kdl".to_string(),
+            help_url: "https://github.com/kachick/dprint-plugin-kdl".to_string(), // fill this in
+            config_schema_url: "".to_string(), // leave this empty for now
+            update_url: Some(
+                "https://plugins.dprint.dev/kachick/dprint-plugin-kdl/latest.json".to_string(),
+            ),
         }
     }
 
@@ -86,25 +81,38 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
         &mut self,
         _config: ConfigKeyMap,
         _global_config: &GlobalConfiguration,
-    ) -> ResolveConfigurationResult<Configuration> {
+    ) -> PluginResolveConfigurationResult<Configuration> {
         let diagnostics = Vec::new();
 
-        ResolveConfigurationResult {
+        PluginResolveConfigurationResult {
             config: Configuration {},
             diagnostics,
+            file_matching: FileMatchingInfo {
+                file_extensions: vec!["kdl".to_string()],
+                file_names: vec![],
+            },
         }
     }
 
     fn format(
         &mut self,
-        file_path: &Path,
-        file_bytes: Vec<u8>,
-        config: &Configuration,
-        mut _format_with_host: impl FnMut(&Path, Vec<u8>, &ConfigKeyMap) -> FormatResult,
+        request: SyncFormatRequest<Configuration>,
+        _format_with_host: impl FnMut(SyncHostFormatRequest) -> FormatResult,
     ) -> FormatResult {
-        let file_text = String::from_utf8(file_bytes)?;
-        format_text(file_path, &file_text, config)
+        if request.range.is_some() {
+            return Ok(None); // not implemented
+        }
+
+        let text = String::from_utf8_lossy(&request.file_bytes);
+        format_text(request.file_path, &text, request.config)
             .map(|maybe_file_text| maybe_file_text.map(|text| text.into_bytes()))
+    }
+
+    fn check_config_updates(
+        &self,
+        _message: dprint_core::plugins::CheckConfigUpdatesMessage,
+    ) -> Result<Vec<dprint_core::plugins::ConfigChange>> {
+        Ok(Vec::new())
     }
 }
 

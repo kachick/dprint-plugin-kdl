@@ -17,3 +17,7 @@ updates:
       determinatesystems-actions:
         patterns:
           - 'DeterminateSystems*'
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly

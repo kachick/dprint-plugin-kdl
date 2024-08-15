@@ -16,6 +16,10 @@ tasks:
   test:
     cmds:
       - cargo test
+  dogfooding: # FIXME
+    cmds:
+      - dprint fmt --config=dprint-dogfooding.json
+      - dprint check --config=dprint-dogfooding.json
   fmt:
     cmds:
       - cargo fmt

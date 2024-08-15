@@ -23,17 +23,16 @@
           unstables = unstable-nixpkgs.legacyPackages.${system};
         in
         {
-          default =
-            with pkgs;
-            mkShell {
-              buildInputs = [
+          default = pkgs.mkShell {
+            buildInputs =
+              with pkgs;
+              [
                 bashInteractive
                 findutils # xargs
                 nixfmt-rfc-style
                 nil
                 go-task
 
-                unstables.dprint
                 typos
 
                 rustc
@@ -41,18 +40,19 @@
                 rustfmt
                 rust-analyzer
                 clippy
-              ];
+              ]
+              ++ [ unstables.dprint ];
 
-              nativeBuildInputs = [
-                rustc-wasm32.llvmPackages.bintools # rust-lld
-              ];
+            nativeBuildInputs = with pkgs; [
+              rustc-wasm32.llvmPackages.bintools # rust-lld
+            ];
 
-              # Needed for avoiding "error: linker `rust-lld` not found".
-              # Adding packages like binutils is not enough
-              #
-              # https://github.com/NixOS/nixpkgs/issues/70238
-              CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
-            };
+            # Needed for avoiding "error: linker `rust-lld` not found".
+            # Adding packages like binutils is not enough
+            #
+            # https://github.com/NixOS/nixpkgs/issues/70238
+            CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
+          };
         }
       );
     };

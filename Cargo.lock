@@ -103,9 +103,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "kdl"
-version = "5.0.0-alpha.1"
+version = "4.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11eecaf214881ac67e858089a815fa8cad941abcf21113970a6c5bc6e6e557c8"
+checksum = "062c875482ccb676fd40c804a40e3824d4464c18c364547456d1c8e8e951ae47"
 dependencies = [
  "miette",
  "nom",

@@ -66,7 +66,7 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             help_url: "https://github.com/kachick/dprint-plugin-kdl".to_string(), // fill this in
             config_schema_url: "".to_string(), // leave this empty for now
             update_url: Some(
-                "https://plugins.dprint.dev/kachick/dprint-plugin-kdl/latest.json".to_string(),
+                "https://plugins.dprint.dev/kachick/kdl/latest.json".to_string(),
             ),
         }
     }

@@ -3,6 +3,6 @@
   },
   "excludes": ["target", "example/official.raw.kdl", "example/zellij-config.wrong.kdl"],
   "plugins": [
-    "https://github.com/kachick/dprint-plugin-kdl/releases/download/0.2.0/plugin.wasm"
+    "https://plugins.dprint.dev/kachick/kdl-0.2.0.wasm"
   ]
 }

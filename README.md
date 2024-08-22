@@ -16,18 +16,17 @@ If you encounter any errors, please try updating this plugin or dprint itself.
 ## Installation
 
 ```bash
-dprint config add 'https://github.com/kachick/dprint-plugin-kdl/releases/download/0.2.0/plugin.wasm'
+dprint config add 'kachick/kdl'
 ```
 
-Currently there are no config options, all formatter features delegating to [upstream crate](https://github.com/kdl-org/kdl-rs).\
-However this plugin preserves config key `kdl`.
+Currently there are no config options, all formatter features delegating to [upstream crate](https://github.com/kdl-org/kdl-rs).
 
 ```json
 {
   "kdl": {
   },
   "plugins": [
-    "https://github.com/kachick/dprint-plugin-kdl/releases/download/0.2.0/plugin.wasm"
+    "https://plugins.dprint.dev/kachick/kdl-0.2.0.wasm"
   ]
 }
 ```

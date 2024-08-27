@@ -1,7 +1,7 @@
 {
   "kdl": {
   },
-  "excludes": ["target", "example/official.raw.kdl", "example/zellij-config.wrong.kdl"],
+  "excludes": ["target", "example/known_issues", "example/*raw.kdl"],
   "plugins": [
     "https://plugins.dprint.dev/kachick/kdl-0.2.0.wasm"
   ]

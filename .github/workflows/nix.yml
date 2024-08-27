@@ -89,7 +89,7 @@ jobs:
         if: steps.dprint-check.outcome == 'success'
       - run: |
           dprint fmt
-          diff ./example/zellij-config.wrong.kdl ./example/zellij-config.expected.kdl
+          diff ./example/zellij-config.raw.kdl ./example/zellij-config.expected.kdl
   release:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04

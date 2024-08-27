@@ -16,19 +16,17 @@ tasks:
   test:
     cmds:
       - cargo test
-  dogfooding: # FIXME
-    cmds:
-      - dprint fmt --config=dprint-dogfooding.json
-      - dprint check --config=dprint-dogfooding.json
   fmt:
     cmds:
       - cargo fmt
       - dprint fmt
+      - dprint fmt --config=dprint-dogfooding.json
       - git ls-files '*.nix' | xargs nix fmt
   lint:
     cmds:
       - cargo clippy
       - dprint check
+      - dprint check --config=dprint-dogfooding.json
       - typos . .github .vscode
       # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
       - git ls-files '*.nix' | xargs nixfmt --check

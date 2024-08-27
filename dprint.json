@@ -10,7 +10,7 @@
   },
   "toml": {
   },
-  "excludes": ["target", "example/official*"],
+  "excludes": ["target"],
   "plugins": [
     "https://plugins.dprint.dev/json-0.19.3.wasm",
     "https://plugins.dprint.dev/markdown-0.17.6.wasm",

@@ -21,12 +21,4 @@ package {
   the-matrix 1 2 3 \
              4 5 6 \
              7 8 9
-
-  // "Slashdash" comments operate at the node level,
-  // with just `/-`.
-  /-this-is-commented {
-    this "entire" "node" {
-      "is" "gone"
-    }
-  }
 }

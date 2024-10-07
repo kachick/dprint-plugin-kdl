@@ -45,6 +45,10 @@ jobs:
       - run: nix flake show
       - run: nix develop --command task deps
       - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+        with:
+          # flack.lock for https://github.com/kachick/dprint-plugin-kdl/pull/39#issuecomment-2396115803
+          # Adding flake.nix to consider the environment values
+          key: additional-${{ hashFiles('flake.*') }}
       - run: nix develop --command task
       - name: Upload WASM file as an artifact
         # id: upload

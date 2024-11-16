@@ -10,7 +10,7 @@ If you encounter any errors, please try updating this plugin or dprint itself.
 
 | [schema version](https://github.com/dprint/dprint/blob/main/docs/wasm-plugin-development.md) | [dprint-plugin-kdl](https://github.com/kachick/dprint-plugin-kdl/releases) |
 | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [v4](https://github.com/dprint/dprint/pull/858)                                              | 0.2.0                                                                      |
+| [v4](https://github.com/dprint/dprint/pull/858)                                              | 0.2.0 or later                                                             |
 | v3                                                                                           | 0.1.0                                                                      |
 
 ## Installation
@@ -26,7 +26,7 @@ Currently there are no config options, all formatter features delegating to [ups
   "kdl": {
   },
   "plugins": [
-    "https://plugins.dprint.dev/kachick/kdl-0.2.0.wasm"
+    "https://plugins.dprint.dev/kachick/kdl-0.2.1.wasm"
   ]
 }
 ```

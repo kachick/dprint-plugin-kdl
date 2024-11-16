@@ -3,6 +3,6 @@
   },
   "excludes": ["target", "example/known_issues", "example/*raw.kdl"],
   "plugins": [
-    "https://plugins.dprint.dev/kachick/kdl-0.2.0.wasm"
+    "https://plugins.dprint.dev/kachick/kdl-0.2.1.wasm"
   ]
 }

@@ -20,9 +20,9 @@ pub fn parse_kdl(input: &str) -> Result<kdl::KdlDocument, kdl::KdlError> {
 }
 
 #[inline]
-pub fn format_kdl(mut input: kdl::KdlDocument) -> String {
+pub fn format_kdl(input: kdl::KdlDocument) -> String {
     // https://github.com/kdl-org/kdl-rs/blob/6044ef9776f24f45004c36d7628b1f5fbd83c8ad/src/entry.rs#L193-L212
-    input.fmt();
+    input.format();
 
     input.to_string()
 }
@@ -65,9 +65,7 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             config_key: "kdl".to_string(),
             help_url: "https://github.com/kachick/dprint-plugin-kdl".to_string(), // fill this in
             config_schema_url: "".to_string(), // leave this empty for now
-            update_url: Some(
-                "https://plugins.dprint.dev/kachick/kdl/latest.json".to_string(),
-            ),
+            update_url: Some("https://plugins.dprint.dev/kachick/kdl/latest.json".to_string()),
         }
     }
 

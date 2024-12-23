@@ -1,14 +1,14 @@
-package    {
+package {
   name my-pkg
-  version    "1.2.3"
+  version "1.2.3"
 
-  dependencies    {
+  dependencies {
     // Nodes can have standalone values as well as
     // key/value pairs.
     lodash "^3.2.1" optional=#true alias=underscore
   }
 
-     scripts {
+  scripts {
     // "Raw" and dedented multi-line strings are supported.
     message """
       hello
@@ -22,7 +22,7 @@ package    {
   }
 
   // `\` breaks up a single node across multiple lines.
-  the-matrix    1 2 3 \
+  the-matrix 1 2 3 \
              4 5 6 \
              7 8 9
 

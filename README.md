@@ -4,9 +4,7 @@
 
 [KDL](https://github.com/kdl-org/kdl) formatter as a [dprint](https://github.com/dprint/dprint) WASM plugin
 
-## WASM Schema versions
-
-If you encounter any errors, please try updating this plugin or dprint itself.
+## Versions for KDL and dprint WASM Schema
 
 | [dprint-plugin-kdl](https://github.com/kachick/dprint-plugin-kdl/releases) | [KDL](https://github.com/kdl-org/kdl/releases)           | [dprint WASM schema](https://github.com/dprint/dprint/blob/main/docs/wasm-plugin-development.md) |
 | -------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |

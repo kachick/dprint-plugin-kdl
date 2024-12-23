@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-kdl"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.95"
 dprint-core = { version = "0.67.2", features = ["wasm"] }
-kdl = "4.7.1"
+kdl = "6.1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 

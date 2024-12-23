@@ -4,14 +4,13 @@
 
 [KDL](https://github.com/kdl-org/kdl) formatter as a [dprint](https://github.com/dprint/dprint) WASM plugin
 
-## WASM Schema versions
+## Versions for KDL and dprint WASM Schema
 
-If you encounter any errors, please try updating this plugin or dprint itself.
-
-| [schema version](https://github.com/dprint/dprint/blob/main/docs/wasm-plugin-development.md) | [dprint-plugin-kdl](https://github.com/kachick/dprint-plugin-kdl/releases) |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [v4](https://github.com/dprint/dprint/pull/858)                                              | 0.2.0 or later                                                             |
-| v3                                                                                           | 0.1.0                                                                      |
+| [dprint-plugin-kdl](https://github.com/kachick/dprint-plugin-kdl/releases) | [KDL](https://github.com/kdl-org/kdl/releases)           | [dprint WASM schema](https://github.com/dprint/dprint/blob/main/docs/wasm-plugin-development.md) |
+| -------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 0.3.x                                                                      | [2.0](https://github.com/kdl-org/kdl/releases/tag/2.0.0) | [v4](https://github.com/dprint/dprint/pull/858)                                                  |
+| 0.2.x                                                                      | 1.0                                                      | v4                                                                                               |
+| 0.1.x                                                                      | 1.0                                                      | v3                                                                                               |
 
 ## Installation
 

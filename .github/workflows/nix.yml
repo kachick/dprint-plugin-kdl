@@ -81,7 +81,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download
+          gh run download '${{ github.run_id }}'
           tree
           dprint config add "file:${PWD}/plugins/dprint_plugin_kdl.wasm"
       - run: dprint output-file-paths | grep -F '.kdl'
@@ -104,7 +104,7 @@ jobs:
       # Required to checkout for gh command
       - uses: actions/checkout@v4
       - run: |
-          gh run download
+          gh run download '${{ github.run_id }}'
           tree
           mv plugins/dprint_plugin_kdl.wasm plugins/plugin.wasm
       - run: |

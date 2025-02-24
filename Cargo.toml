@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.96"
 dprint-core = { version = "0.67.3", features = ["wasm"] }
 kdl = "6.3.3"
 serde = { version = "1.0", features = ["derive"] }

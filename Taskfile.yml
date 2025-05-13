@@ -40,7 +40,7 @@ tasks:
       - rustfmt --version
       - dprint --version
       - nix --version
-      - nil --version
+      - nixd --version
       - nixfmt --version
       - task --version
       - typos --version

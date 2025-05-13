@@ -1,0 +1,23 @@
+// Imported from https://github.com/kachick/micro-kdl/blob/c6f13bb4dfc0d9bd40d9ff55b8dc28d706d363c8/workspace/zellij/layouts/side-by-side.kdl
+layout {
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+    // BPS
+    pane split_direction="vertical" {
+        pane name="work" size="50%" {
+
+        }
+        pane split_direction="horizontal" size="50%" {
+            pane name="micro" command="task" {
+                args "micro"
+            }
+            pane name="helix" command="hx" {
+                args "--config" "./workspace/helix/config.toml" "example/official.kdl"
+            }
+        }
+    }
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar" // A comment
+    }
+}

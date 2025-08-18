@@ -37,7 +37,7 @@ jobs:
     # outputs:
     #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix flake check
@@ -69,7 +69,7 @@ jobs:
     timeout-minutes: 15
     needs: [build]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:
           dprint-version: '${{ matrix.dprint-version }}'
@@ -103,7 +103,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       # Required to checkout for gh command
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: |
           gh run download '${{ github.run_id }}'
           tree

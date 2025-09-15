@@ -38,7 +38,7 @@ jobs:
     #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v5
-      - uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
+      - uses: DeterminateSystems/nix-installer-action@786fff0690178f1234e4e1fe9b536e94f5433196 # v20
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix flake check
       - run: nix flake show

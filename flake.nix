@@ -38,6 +38,7 @@
               typos
 
               dprint
+              wasm-tools # How to use: https://github.com/NixOS/nixpkgs/pull/451399#pullrequestreview-3402766846
               rustc
               cargo
               rustfmt

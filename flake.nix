@@ -46,7 +46,7 @@
             ];
 
             nativeBuildInputs = with pkgs; [
-              rustc-wasm32.llvmPackages.bintools # rust-lld
+              rustc.llvmPackages.bintools # rust-lld
             ];
 
             # Needed for avoiding "error: linker `rust-lld` not found".

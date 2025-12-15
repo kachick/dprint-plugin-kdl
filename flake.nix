@@ -32,7 +32,8 @@
             buildInputs = with pkgs; [
               bashInteractive
               findutils # xargs
-              nixfmt-rfc-style
+              nixfmt-tree
+              nixfmt
               nixd
               go-task
               typos

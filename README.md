@@ -25,7 +25,7 @@ Currently there are no config options, all formatter features delegating to [ups
   "kdl": {
   },
   "plugins": [
-    "https://plugins.dprint.dev/kachick/kdl-0.3.2.wasm"
+    "https://plugins.dprint.dev/kachick/kdl-0.3.3.wasm"
   ]
 }
 ```

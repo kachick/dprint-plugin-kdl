@@ -1,11 +1,13 @@
 package {
     name my-pkg
     version "1.2.3"
-    dependencies {// Nodes can have standalone values as well as
+    dependencies {
+        // Nodes can have standalone values as well as
         // key/value pairs.
         lodash ^3.2.1 optional=#true alias=underscore
     }
-    scripts {// "Raw" and dedented multi-line strings are supported.
+    scripts {
+        // "Raw" and dedented multi-line strings are supported.
         message "hello\nworld"
         build "echo \"foo\"\nnode -c \"console.log('hello, world!');\"\necho \"foo\" > some-file.txt"
     }

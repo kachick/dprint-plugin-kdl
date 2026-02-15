@@ -30,6 +30,23 @@ Currently there are no config options, all formatter features delegating to [ups
 }
 ```
 
+If you use KDL v1, plugin version 0.2.x is better.
+
+```json
+{
+  "kdl": {
+  },
+  "plugins": [
+    "https://plugins.dprint.dev/kachick/kdl-0.2.1.wasm"
+  ]
+}
+```
+
+Some famous applications still use KDL v1 for now:
+
+- [Zellij](https://github.com/zellij-org/zellij/issues/3891)
+- [niri](https://github.com/niri-wm/niri/issues/888)
+
 ## Link
 
 <https://github.com/kdl-org/kdl/issues/393>

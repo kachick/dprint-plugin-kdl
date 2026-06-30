@@ -37,7 +37,7 @@ jobs:
     # outputs:
     #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
         with:
           extra_nix_config: |
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 15
     needs: [build]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:
           dprint-version: '${{ matrix.dprint-version }}'
@@ -116,7 +116,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       # Required to checkout for gh command
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: |
           gh run download '${{ github.run_id }}'
           tree

@@ -51,7 +51,7 @@ jobs:
       # See also:
       #   - https://github.com/kachick/dprint-plugin-typstyle/commit/50bc2b6bce904f9284d00cd5348dc4042de9f4df
       #   - https://github.com/kachick/dprint-plugin-kdl/pull/39#issuecomment-2396115803
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/bin/

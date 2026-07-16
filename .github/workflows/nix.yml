@@ -32,7 +32,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     # outputs:
     #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
@@ -78,7 +78,7 @@ jobs:
           '', # empty means to latest: https://github.com/dprint/check/blob/2f1cf31537886c3bfb05591c031f7744e48ba8a1/action.yml#L8
           '0.55.1', # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
         ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs: [build]
     steps:
@@ -109,7 +109,7 @@ jobs:
           diff ./example/zellij-config.raw.kdl ./example/zellij-config.expected.kdl
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs: [build, check]
     env:

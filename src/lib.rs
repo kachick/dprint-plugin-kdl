@@ -1,4 +1,5 @@
 use dprint_core::plugins::FileMatchingInfo;
+use dprint_core::plugins::FormatError;
 use dprint_core::plugins::FormatResult;
 use dprint_core::plugins::PluginInfo;
 use dprint_core::plugins::PluginResolveConfigurationResult;
@@ -85,12 +86,13 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
         let text = String::from_utf8_lossy(&request.file_bytes);
         format_text(request.file_path, &text, request.config)
             .map(|maybe_file_text| maybe_file_text.map(|text| text.into_bytes()))
+            .map_err(FormatError::new)
     }
 
     fn check_config_updates(
         &self,
         _message: dprint_core::plugins::CheckConfigUpdatesMessage,
-    ) -> Result<Vec<dprint_core::plugins::ConfigChange>> {
+    ) -> std::result::Result<Vec<dprint_core::plugins::ConfigChange>, FormatError> {
         Ok(Vec::new())
     }
 }

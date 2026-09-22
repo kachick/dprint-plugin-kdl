@@ -39,7 +39,8 @@ tasks:
       - cargo test --workspace
   test-e2e:
     deps:
-      - test-e2e-default
+      - test-e2e-official
+      - test-e2e-zellij
   test-e2e-*:
     deps:
       - build
@@ -47,17 +48,18 @@ tasks:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
       - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.kdl
-      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.kdl | dprint fmt --stdin ../raw.kdl --plugins="$PLUGIN_PATH") expected.kdl
+      - cd 'tests/{{.TESTNAME}}' && diff <(cat raw.kdl | dprint fmt --stdin raw.kdl --plugins="$PLUGIN_PATH") expected.kdl
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && cat ../raw.kdl | dprint fmt --stdin ../raw.kdl --plugins="$PLUGIN_PATH" > expected.kdl
+      - cd 'tests/{{.TESTNAME}}' && cat raw.kdl | dprint fmt --stdin raw.kdl --plugins="$PLUGIN_PATH" > expected.kdl
   bump-fixtures:
     deps:
-      - bump-fixtures-default
+      - bump-fixtures-official
+      - bump-fixtures-zellij
   fmt:
     cmds:
       - cargo fmt

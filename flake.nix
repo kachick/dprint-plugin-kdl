@@ -14,6 +14,18 @@
     in
     {
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        rec {
+          dprint-plugin-kdl = pkgs.callPackage ./package.nix { };
+          default = dprint-plugin-kdl;
+        }
+      );
+
       devShells = forAllSystems (
         system:
         let
@@ -21,29 +33,23 @@
         in
         {
           default = pkgs.mkShell {
-
-            env = {
-              # Fix nixd pkgs versions in the inlay hints
-              NIX_PATH = "nixpkgs=${pkgs.path}";
-              # For vscode typos extension
-              TYPOS_LSP_PATH = lib.getExe pkgs.typos-lsp;
-            };
+            # How to use `inputsFrom`: https://github.com/NixOS/nixpkgs/issues/58624#issuecomment-1576860784
+            inputsFrom = [ self.packages.${system}.dprint-plugin-kdl ];
 
             buildInputs = with pkgs; [
               bashInteractive
               findutils # xargs
-              nixfmt-tree
+              diffutils # for E2E test
               nixfmt
+              nixfmt-tree
               nixd
               go-task
               typos
               zizmor
 
-              dprint
               wasm-tools # How to use: https://github.com/NixOS/nixpkgs/pull/451399#pullrequestreview-3402766846
-              rustc
-              cargo
-              rustfmt
+
+              # buildRustPackage does not enable these
               rust-analyzer
               clippy
             ];
@@ -52,11 +58,16 @@
               rustc.llvmPackages.bintools # rust-lld
             ];
 
-            # Needed for avoiding "error: linker `rust-lld` not found".
-            # Adding packages like binutils is not enough
-            #
-            # https://github.com/NixOS/nixpkgs/issues/70238
-            CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
+            env = {
+              # Needed for avoiding "error: linker `rust-lld` not found".
+              # Adding packages like binutils is not enough
+              #
+              # https://github.com/NixOS/nixpkgs/issues/70238
+              CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
+
+              # Workaround for rust-analyzer error
+              RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+            };
           };
         }
       );

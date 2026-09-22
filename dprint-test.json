@@ -1,8 +1,0 @@
-{
-  "kdl": {
-  },
-  "excludes": ["target", "example/*raw.kdl"],
-  "plugins": [
-    "target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm"
-  ]
-}

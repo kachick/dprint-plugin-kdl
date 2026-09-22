@@ -2,27 +2,66 @@
 
 version: '3'
 
+env:
+  # If test for nix product: `PLUGIN_PATH="$PWD/result/lib/plugin.wasm" task`
+  PLUGIN_PATH: '{{.USER_WORKING_DIR}}/target/wasm32-unknown-unknown/debug/dprint_plugin_kdl.wasm'
+
 tasks:
   default:
     deps:
-      - task: check
-  build:
-    - cargo build --release --target=wasm32-unknown-unknown
+      - check
+      - test
+  build: # Prefer cargo cache rather than go-task cache feature
+    env:
+      SKIP_BUILD: 'false' # Don't use "$CI" for this purpose
+      CARGO_BUILD_TARGET: 'wasm32-unknown-unknown'
+    status:
+      - |
+        [ "$SKIP_BUILD" == 'true' ]
+    cmds:
+      # Omit "--release" for development purpose. Release assets should use `nix build`
+      - cargo build
   check:
     deps:
-      - task: test
-      - task: lint
+      - test
+      - lint
   test:
     deps:
-      - build
+      - test-unit
+      - test-e2e
+  test-unit:
+    env:
+      SKIP_BUILD: 'false'
+    status:
+      - |
+        [ "$SKIP_BUILD" == 'true' ]
     cmds:
-      - cargo test
-      - dprint check --config=dprint-test.json
+      - cargo test --workspace
+  test-e2e:
+    deps:
+      - test-e2e-default
+  test-e2e-*:
+    deps:
+      - build
+    vars:
+      TESTNAME: '{{index .MATCH 0}}'
+    cmds:
+      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.kdl
+      - cd 'tests/{{.TESTNAME}}' && diff <(cat ../raw.kdl | dprint fmt --stdin ../raw.kdl --plugins="$PLUGIN_PATH") expected.kdl
+  bump-fixtures-*:
+    deps:
+      - build
+    vars:
+      TESTNAME: '{{index .MATCH 0}}'
+    cmds:
+      - cd 'tests/{{.TESTNAME}}' && cat ../raw.kdl | dprint fmt --stdin ../raw.kdl --plugins="$PLUGIN_PATH" > expected.kdl
+  bump-fixtures:
+    deps:
+      - bump-fixtures-default
   fmt:
     cmds:
       - cargo fmt
       - dprint fmt
-      - dprint fmt --config=dprint-test.json
       - treefmt
   lint:
     cmds:

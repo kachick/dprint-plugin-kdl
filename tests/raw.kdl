@@ -1,3 +1,13 @@
+default_mode    "locked"
+  keybinds {
+    shared_except "locked" {
+      bind "Alt q" {
+        Quit
+         }
+      unbind "Ctrl q"   // conflict with micro
+  }
+}
+
 package {
   name my-pkg
   version "1.2.3"

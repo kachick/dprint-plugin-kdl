@@ -10,9 +10,13 @@ description = "dprint plugin for KDL formatting using kdl"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+schema = ["dep:schemars"]
+
 [dependencies]
 dprint-core = { version = "0.69.1", features = ["wasm"] }
 kdl = "6.7.1"
+schemars = { version = "1.2.1", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 
@@ -20,3 +24,7 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 crate-type = ["lib", "cdylib"]
 # Distributed only as a dprint WASM plugin with no public Rust API
 doctest = false
+
+[workspace]
+resolver = "2"
+members = ["crates/schemagen"]

@@ -6,11 +6,36 @@ use dprint_core::plugins::{
     SyncFormatRequest, SyncHostFormatRequest, SyncPluginHandler,
 };
 use kdl::KdlDocument;
+#[cfg(feature = "schema")]
+use schemars::{JsonSchema, schema_for};
 use serde::Serialize;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct Configuration {}
+
+#[cfg(feature = "schema")]
+#[must_use]
+pub fn generate_json_schema() -> String {
+    let mut schema = serde_json::to_value(schema_for!(Configuration)).unwrap();
+    let version = env!("CARGO_PKG_VERSION");
+    if let Some(obj) = schema.as_object_mut() {
+        obj.remove("title");
+        obj.remove("required");
+        obj.insert(
+            "$id".to_string(),
+            serde_json::Value::String(format!(
+                "https://plugins.dprint.dev/kachick/kdl/{version}/schema.json"
+            )),
+        );
+        obj.insert(
+            "additionalProperties".to_string(),
+            serde_json::Value::Bool(false),
+        );
+    }
+    serde_json::to_string_pretty(&schema).unwrap()
+}
 
 #[derive(Default)]
 pub struct KdlPluginHandler;

@@ -30,14 +30,22 @@ on:
     - cron: '42 1 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    permissions:
+      id-token: 'write'
+      contents: 'read'
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     # outputs:
     #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
           extra_nix_config: |
@@ -46,13 +54,13 @@ jobs:
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix flake check
       - run: nix flake show
-      - run: nix develop --command task deps
       # Don't use Swatinem/rust-cache for adjusting with Nix environment
       # See also:
       #   - https://github.com/kachick/dprint-plugin-typstyle/commit/50bc2b6bce904f9284d00cd5348dc4042de9f4df
       #   - https://github.com/kachick/dprint-plugin-kdl/pull/39#issuecomment-2396115803
       - uses: actions/cache@v6
         with:
+          lookup-only: ${{ startsWith(github.ref, 'refs/tags/') }}
           path: |
             ~/.cargo/bin/
             ~/.cargo/registry/index/
@@ -83,6 +91,8 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: dprint/check@7dc032d8874778fc024f6f9b4a7e6d896782c330 # v2.5
         with:
           dprint-version: '${{ matrix.dprint-version }}'
@@ -112,11 +122,16 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     needs: [build, check]
+    permissions:
+      contents: write
+      actions: read
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
       # Required to checkout for gh command
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - run: |
           gh run download '${{ github.run_id }}'
           tree

@@ -29,18 +29,10 @@ tasks:
       - cargo clippy
       - dprint check
       - typos . .github .vscode
+      - zizmor .
       # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
       - git ls-files '*.nix' | xargs nixfmt --check
-  deps:
+      - git ls-files | xargs nix run github:kachick/selfup/v1.3.1 -- list -check
+  selfup:
     cmds:
-      - rustc --version
-      - cargo --version
-      - rust-analyzer --version
-      - clippy-driver --version
-      - rustfmt --version
-      - dprint --version
-      - nix --version
-      - nixd --version
-      - nixfmt --version
-      - task --version
-      - typos --version
+      - git ls-files | xargs nix run github:kachick/selfup/v1.3.1 -- run

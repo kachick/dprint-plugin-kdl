@@ -1,0 +1,74 @@
+{
+  lib,
+  rustPlatform,
+  rustc,
+  dprint,
+  writableTmpDirAsHomeHook,
+}:
+
+let
+  wasmTarget = "wasm32-unknown-unknown";
+in
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "dprint-plugin-kdl";
+  version = with builtins; (fromTOML (readFile ./Cargo.toml)).package.version;
+
+  __structuredAttrs = true;
+
+  src = lib.fileset.toSource {
+    root = ./.;
+    fileset = lib.fileset.unions [
+      ./src
+      ./crates/schemagen
+      ./Cargo.toml
+      ./Cargo.lock
+      ./LICENSE
+      ./tests
+    ];
+  };
+
+  cargoLock.lockFile = ./Cargo.lock;
+
+  nativeBuildInputs = [
+    rustc.llvmPackages.bintools # rust-lld
+  ];
+
+  cargoBuildFlags = [
+    "--target"
+    wasmTarget
+    "--package"
+    "dprint-plugin-kdl"
+    "--package"
+    "schemagen"
+  ];
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p "$out/lib" "$out/share"
+    cp target/${wasmTarget}/release/dprint_plugin_kdl.wasm "$out/lib/plugin.wasm"
+    cp target/${wasmTarget}/release/build/schemagen-*/out/schema.json "$out/share/schema.json"
+
+    runHook postInstall
+  '';
+
+  doInstallCheck = true;
+
+  nativeInstallCheckInputs = [
+    dprint
+    writableTmpDirAsHomeHook
+  ];
+
+  installCheckPhase = ''
+    runHook preInstallCheck
+    cd "$(mktemp --directory)"
+    dprint check --allow-no-files --config-discovery=false --plugins "$out/lib/plugin.wasm"
+    runHook postInstallCheck
+  '';
+
+  meta = {
+    description = "Dprint Wasm plugin for KDL";
+    homepage = "https://github.com/kachick/dprint-plugin-kdl";
+    license = lib.licenses.mit;
+  };
+})

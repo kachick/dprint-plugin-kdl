@@ -1,0 +1,71 @@
+# Nix sandbox build is much slow and cannot reuse crate cache. So this workflow just uses the devshell likely local development
+name: CI
+on:
+  push:
+    tags:
+      # Do not add v prefix: https://github.com/dprint/plugins/blob/75a3755b8734eee294214a7d7efc18145668a99f/README.md?plain=1#L27
+      # https://github.com/actions/runner/issues/1699#issuecomment-1046796067
+      - '[0-9]+.[0-9]+.[0-9]+'
+    branches: [main]
+    paths:
+      - '.github/workflows/nix.yml'
+      - '.github/actions/setup-nix'
+      - '**.nix'
+      - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'tests'
+      - 'Taskfile.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/nix.yml'
+      - '.github/actions/setup-nix'
+      - '**.nix'
+      - 'flake.*'
+      - '**.rs'
+      - 'Cargo.*'
+      - 'tests'
+      - 'Taskfile.yml'
+  schedule:
+    # Every 10:42 JST
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '42 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tasks:
+    permissions:
+      id-token: 'write'
+      contents: 'read'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/setup-nix
+      # Don't use Swatinem/rust-cache for adjusting with Nix environment
+      # https://github.com/actions/cache/blob/d4323d4df104b026a6aa633fdb11d772146be0bf/examples.md?plain=1#L610-L622
+      - uses: actions/cache@v6
+        with:
+          lookup-only: ${{ startsWith(github.ref, 'refs/tags/') }}
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-flake-${{ hashFiles('flake.lock') }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-flake-${{ hashFiles('flake.lock') }}-
+      - name: Install direnv
+        run: |
+          url="$(nix eval --raw --impure --expr '(builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.nixpkgs.locked.url')"
+          nix profile add "${url}#direnv"
+      - name: Apply direnv
+        run: |
+          direnv allow .
+          direnv export gha > "$GITHUB_ENV"
+      - run: task

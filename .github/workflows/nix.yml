@@ -9,20 +9,22 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/nix.yml'
+      - '.github/actions/setup-nix'
       - '**.nix'
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'example'
+      - 'tests'
       - 'Taskfile.yml'
   pull_request:
     paths:
       - '.github/workflows/nix.yml'
+      - '.github/actions/setup-nix'
       - '**.nix'
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'example'
+      - 'tests'
       - 'Taskfile.yml'
   schedule:
     # Every 10:42 JST
@@ -40,101 +42,45 @@ jobs:
       contents: 'read'
     runs-on: ubuntu-26.04
     timeout-minutes: 30
-    # outputs:
-    #   wasm-zip-url: ${{ steps.upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
-        with:
-          extra_nix_config: |
-            sandbox = true
-            accept-flake-config = true
-      - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
-      - run: nix flake check
-      - run: nix flake show
-      # Don't use Swatinem/rust-cache for adjusting with Nix environment
-      # See also:
-      #   - https://github.com/kachick/dprint-plugin-typstyle/commit/50bc2b6bce904f9284d00cd5348dc4042de9f4df
-      #   - https://github.com/kachick/dprint-plugin-kdl/pull/39#issuecomment-2396115803
-      - uses: actions/cache@v6
-        with:
-          lookup-only: ${{ startsWith(github.ref, 'refs/tags/') }}
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-flake-${{ hashFiles('flake.lock') }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-flake-${{ hashFiles('flake.lock') }}-
-      - run: nix develop --command task
+      - uses: $/.github/actions/setup-nix
+      # Don't use rust caches since using package.nix, rust cachees are only available in devshell workflow.
+      - run: nix build
+      - run: tree -h result/
       - name: Upload WASM file as an artifact
-        # id: upload
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: 'plugins'
-          path: 'target/wasm32-unknown-unknown/release/dprint_plugin_kdl.wasm'
-  check:
-    strategy:
-      fail-fast: false
-      # Syntax https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
-      matrix:
-        # Due to https://github.com/actions/runner/issues/849, we have to use quotes for 'n.0'
-        dprint-version: [
-          '', # empty means to latest: https://github.com/dprint/check/blob/2f1cf31537886c3bfb05591c031f7744e48ba8a1/action.yml#L8
-          '0.57.4', # selfup {"extract":"\\d[^']+","replacer":["dprint", "--version"], "nth": 2}
-        ]
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    needs: [build]
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: dprint/check@7dc032d8874778fc024f6f9b4a7e6d896782c330 # v2.5
-        with:
-          dprint-version: '${{ matrix.dprint-version }}'
-      - name: Make sure dprint status
-        run: |
-          dprint --version
-          dprint output-file-paths
-      - name: Install WASM plugin
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh run download '${{ github.run_id }}'
-          tree
-          dprint config add "file:${PWD}/plugins/dprint_plugin_kdl.wasm"
-      - run: dprint output-file-paths | grep -F '.kdl'
-      - run: dprint check
-        id: dprint-check
-        continue-on-error: true
-      - run: |
-          false
-        if: steps.dprint-check.outcome == 'success'
-      - run: |
-          dprint fmt
-          diff ./example/zellij-config.raw.kdl ./example/zellij-config.expected.kdl
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    needs: [build, check]
+          if-no-files-found: error
+          name: 'dist'
+          path: |
+            result/lib/plugin.wasm
+            result/share/schema.json
+
+  flake:
     permissions:
-      contents: write
-      actions: read
-    env:
-      GH_TOKEN: ${{ github.token }}
+      id-token: 'write'
+      contents: 'read'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
     steps:
-      # Required to checkout for gh command
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - run: |
-          gh run download '${{ github.run_id }}'
-          tree
-          mv plugins/dprint_plugin_kdl.wasm plugins/plugin.wasm
-      - run: |
-          gh release create --verify-tag "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" plugins/plugin.wasm
+      - uses: $/.github/actions/setup-nix
+      # Don't use cache action, this task does not compile the dependencies. And it unexpectedly overrides cache result in build job
+      - run: nix flake check
+      - run: nix flake show
+
+  CD:
+    needs: [build]
+    permissions:
+      # "contents: write" allows the action to create a release: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions
+      contents: write
+      actions: read # For `gh run download`
+    uses: $/.github/workflows/CD.yml
+    with:
+      run_id: '${{ github.run_id }}'
+      release: ${{ startsWith(github.ref, 'refs/tags/') }}

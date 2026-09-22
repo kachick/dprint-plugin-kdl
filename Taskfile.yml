@@ -41,6 +41,7 @@ tasks:
     deps:
       - test-e2e-official
       - test-e2e-zellij
+      - test-e2e-zellij-v1
   test-e2e-*:
     deps:
       - build
@@ -60,6 +61,7 @@ tasks:
     deps:
       - bump-fixtures-official
       - bump-fixtures-zellij
+      - bump-fixtures-zellij-v1
   fmt:
     cmds:
       - cargo fmt

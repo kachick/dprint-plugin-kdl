@@ -19,6 +19,15 @@ mod tests {
         let valid = serde_json::json!({});
         assert!(validator.is_valid(&valid));
 
+        let valid_v1 = serde_json::json!({ "kdlVersion": "v1" });
+        assert!(validator.is_valid(&valid_v1));
+
+        let valid_v2 = serde_json::json!({ "kdlVersion": "v2" });
+        assert!(validator.is_valid(&valid_v2));
+
+        let invalid_version = serde_json::json!({ "kdlVersion": "v3" });
+        assert!(!validator.is_valid(&invalid_version));
+
         let invalid = serde_json::json!({ "unknownKey": "unknown" });
         assert!(!validator.is_valid(&invalid));
     }

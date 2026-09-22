@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-kdl"
-version = "0.3.3"
+version = "0.4.0"
 authors = ["Kenichi Kamiya <kachick1@gmail.com>"]
 edition = "2024"
 license = "MIT"
@@ -16,6 +16,11 @@ schema = ["dep:schemars"]
 [dependencies]
 dprint-core = { version = "0.69.1", features = ["wasm"] }
 kdl = "6.7.1"
+# Although kdl 6.x provides an optional "v1" feature, it converts the AST into v2 representation
+# (e.g. autoformatting outputs #true instead of true, and strips quotes from strings).
+# We intentionally depend directly on kdl 4.x to provide genuine, stable KDL v1 formatting.
+# See: https://github.com/kdl-org/kdl-rs/blob/v6.7.1/Cargo.toml#L18-L28
+kdl-v1 = { package = "kdl", version = "4.7.0" }
 schemars = { version = "1.2.1", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }

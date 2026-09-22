@@ -1,5 +1,5 @@
 use dprint_core::configuration::{
-    ConfigKeyMap, GlobalConfiguration, get_unknown_property_diagnostics,
+    ConfigKeyMap, GlobalConfiguration, get_nullable_value, get_unknown_property_diagnostics,
 };
 use dprint_core::plugins::{
     FileMatchingInfo, FormatError, FormatResult, PluginInfo, PluginResolveConfigurationResult,
@@ -8,12 +8,37 @@ use dprint_core::plugins::{
 use kdl::KdlDocument;
 #[cfg(feature = "schema")]
 use schemars::{JsonSchema, schema_for};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+pub enum KdlVersion {
+    #[serde(rename = "v1")]
+    V1,
+    #[default]
+    #[serde(rename = "v2")]
+    V2,
+}
+
+impl std::str::FromStr for KdlVersion {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "v1" => Ok(Self::V1),
+            "v2" => Ok(Self::V2),
+            _ => Err(format!("Expected 'v1' or 'v2', but found '{s}'")),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct Configuration {}
+pub struct Configuration {
+    #[serde(default)]
+    pub kdl_version: KdlVersion,
+}
 
 #[cfg(feature = "schema")]
 #[must_use]
@@ -61,14 +86,16 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
 
     fn resolve_config(
         &mut self,
-        config: ConfigKeyMap,
+        mut config: ConfigKeyMap,
         _global_config: &GlobalConfiguration,
     ) -> PluginResolveConfigurationResult<Configuration> {
         let mut diagnostics = Vec::new();
+        let kdl_version =
+            get_nullable_value(&mut config, "kdlVersion", &mut diagnostics).unwrap_or_default();
         diagnostics.extend(get_unknown_property_diagnostics(config));
 
         PluginResolveConfigurationResult {
-            config: Configuration {},
+            config: Configuration { kdl_version },
             diagnostics,
             file_matching: FileMatchingInfo {
                 file_extensions: vec!["kdl".to_string()],
@@ -91,12 +118,23 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             Err(err) => return Err(FormatError::new(err.to_string())),
         };
 
-        let mut doc: KdlDocument = text
-            .parse::<KdlDocument>()
-            .map_err(|err| FormatError::new(err.to_string()))?;
-        doc.autoformat();
+        let result = match request.config.kdl_version {
+            KdlVersion::V1 => {
+                let mut doc: kdl_v1::KdlDocument = text
+                    .parse::<kdl_v1::KdlDocument>()
+                    .map_err(|err| FormatError::new(err.to_string()))?;
+                doc.fmt();
+                doc.to_string()
+            }
+            KdlVersion::V2 => {
+                let mut doc: KdlDocument = text
+                    .parse::<KdlDocument>()
+                    .map_err(|err| FormatError::new(err.to_string()))?;
+                doc.autoformat();
+                doc.to_string()
+            }
+        };
 
-        let result = doc.to_string();
         if result != text {
             Ok(Some(result.into_bytes()))
         } else {
@@ -220,5 +258,92 @@ mod tests {
         };
         let result = handler.format(request, |_| unreachable!());
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_resolve_config_kdl_version() {
+        let mut handler = KdlPluginHandler;
+
+        // Default should be V2
+        let result = handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
+        assert_eq!(result.config.kdl_version, KdlVersion::V2);
+        assert!(result.diagnostics.is_empty());
+
+        // Explicit v1
+        let mut config_v1 = ConfigKeyMap::new();
+        config_v1.insert(
+            "kdlVersion".to_string(),
+            ConfigKeyValue::String("v1".to_string()),
+        );
+        let result_v1 = handler.resolve_config(config_v1, &GlobalConfiguration::default());
+        assert_eq!(result_v1.config.kdl_version, KdlVersion::V1);
+        assert!(result_v1.diagnostics.is_empty());
+
+        // Explicit v2
+        let mut config_v2 = ConfigKeyMap::new();
+        config_v2.insert(
+            "kdlVersion".to_string(),
+            ConfigKeyValue::String("v2".to_string()),
+        );
+        let result_v2 = handler.resolve_config(config_v2, &GlobalConfiguration::default());
+        assert_eq!(result_v2.config.kdl_version, KdlVersion::V2);
+        assert!(result_v2.diagnostics.is_empty());
+
+        // Invalid version
+        let mut config_invalid = ConfigKeyMap::new();
+        config_invalid.insert(
+            "kdlVersion".to_string(),
+            ConfigKeyValue::String("v3".to_string()),
+        );
+        let result_invalid =
+            handler.resolve_config(config_invalid, &GlobalConfiguration::default());
+        assert_eq!(result_invalid.diagnostics.len(), 1);
+        assert_eq!(result_invalid.diagnostics[0].property_name, "kdlVersion");
+    }
+
+    #[test]
+    fn test_format_v1_and_v2_differences() {
+        let mut handler = KdlPluginHandler;
+        let cancellation_token = NullCancellationToken;
+
+        // In KDL v1:
+        // - `key="value"` preserves quotes for string values
+        // - `flag=true` is valid boolean syntax
+        let v1_input = b"node   key=\"value\"   flag=true".to_vec();
+        let config_v1 = Configuration {
+            kdl_version: KdlVersion::V1,
+        };
+        let request_v1 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v1_input,
+            config_id: FormatConfigId::from_raw(1),
+            config: &config_v1,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v1 = handler.format(request_v1, |_| unreachable!()).unwrap();
+        assert!(formatted_v1.is_some());
+        let formatted_str_v1 = String::from_utf8(formatted_v1.unwrap()).unwrap();
+        assert_eq!(formatted_str_v1, "node key=\"value\" flag=true\n");
+
+        // In KDL v2:
+        // - `key="value"` strips quotes for identifier-like strings -> `key=value`
+        // - boolean requires `#` prefix -> `flag=#true`
+        let v2_input = b"node   key=\"value\"   flag=#true".to_vec();
+        let config_v2 = Configuration {
+            kdl_version: KdlVersion::V2,
+        };
+        let request_v2 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v2_input,
+            config_id: FormatConfigId::from_raw(2),
+            config: &config_v2,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v2 = handler.format(request_v2, |_| unreachable!()).unwrap();
+        assert!(formatted_v2.is_some());
+        let formatted_str_v2 = String::from_utf8(formatted_v2.unwrap()).unwrap();
+        assert_eq!(formatted_str_v2, "node key=value flag=#true\n");
     }
 }

@@ -29,5 +29,17 @@
   ],
   "schedule": [
     "on Friday"
+  ],
+  "packageRules": [
+    {
+      "description": "Keep kdl-v1 on 4.x for genuine KDL v1 formatting",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchDepNames": [
+        "kdl-v1"
+      ],
+      "allowedVersions": "< 5.0.0"
+    }
   ]
 }

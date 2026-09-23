@@ -69,6 +69,6 @@ rustPlatform.buildRustPackage (finalAttrs: {
   meta = {
     description = "Dprint Wasm plugin for KDL";
     homepage = "https://github.com/kachick/dprint-plugin-kdl";
-    license = lib.licenses.mit;
+    license = lib.licenses.asl20;
   };
 })

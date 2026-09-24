@@ -150,6 +150,8 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
 #[cfg(target_arch = "wasm32")]
 use dprint_core::generate_plugin_code;
 
+// generate_plugin_code! initializes a static variable, so the second argument must be a const expression.
+// Default::default() cannot be used here because trait methods cannot be called in statics.
 #[cfg(target_arch = "wasm32")]
 generate_plugin_code!(KdlPluginHandler, KdlPluginHandler);
 

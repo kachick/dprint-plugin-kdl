@@ -181,6 +181,7 @@ mod tests {
         let mut handler = KdlPluginHandler;
         let result = handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
         assert!(result.diagnostics.is_empty());
+        assert_eq!(result.config, Configuration::default());
         assert_eq!(result.file_matching.file_extensions, vec!["kdl"]);
     }
 
@@ -274,11 +275,6 @@ mod tests {
     #[test]
     fn test_resolve_config_kdl_version() {
         let mut handler = KdlPluginHandler;
-
-        // Default should be V2
-        let result = handler.resolve_config(ConfigKeyMap::new(), &GlobalConfiguration::default());
-        assert_eq!(result.config.kdl_version, KdlVersion::V2);
-        assert!(result.diagnostics.is_empty());
 
         // Explicit v1
         let mut config_v1 = ConfigKeyMap::new();

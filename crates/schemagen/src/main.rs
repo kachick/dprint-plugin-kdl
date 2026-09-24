@@ -14,6 +14,7 @@ mod tests {
         assert!(!schema.contains(r#""required":"#));
 
         let schema_value: serde_json::Value = serde_json::from_str(schema).unwrap();
+        assert_eq!(schema_value["properties"]["kdlVersion"]["default"], "v2");
         let validator = jsonschema::validator_for(&schema_value).expect("valid JSON Schema");
 
         let valid = serde_json::json!({});

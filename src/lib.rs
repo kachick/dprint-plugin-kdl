@@ -58,6 +58,18 @@ pub fn generate_json_schema() -> String {
             "additionalProperties".to_string(),
             serde_json::Value::Bool(false),
         );
+
+        if let Some(properties) = obj.get_mut("properties").and_then(|p| p.as_object_mut()) {
+            if let Ok(serde_json::Value::Object(defaults)) =
+                serde_json::to_value(Configuration::default())
+            {
+                for (key, default_val) in defaults {
+                    if let Some(prop) = properties.get_mut(&key).and_then(|p| p.as_object_mut()) {
+                        prop.insert("default".to_string(), default_val);
+                    }
+                }
+            }
+        }
     }
     serde_json::to_string_pretty(&schema).unwrap()
 }

@@ -113,10 +113,7 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             return Ok(None);
         }
 
-        let text = match std::str::from_utf8(&request.file_bytes) {
-            Ok(text) => text,
-            Err(err) => return Err(FormatError::new(err.to_string())),
-        };
+        let text = std::str::from_utf8(&request.file_bytes)?;
 
         let result = match request.config.kdl_version {
             KdlVersion::V1 => {

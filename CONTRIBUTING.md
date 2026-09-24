@@ -1,17 +1,6 @@
 # How to develop
 
-## Setup
+I maintain several dprint WASM plugins that only delegate formatting to upstream crates.
 
-1. Install [Nix](https://nixos.org/) package manager and enable [Flakes](https://wiki.nixos.org/wiki/Flakes)\
-   Or use Nix installed containers. For example, look at [this repo](https://github.com/kachick/containers)
-2. Run dev shell as one of the following
-   - with [direnv](https://github.com/direnv/direnv): `direnv allow`
-   - nix only: `nix develop`
-3. You can use development tools
-
-```console
-> nix develop
-(prepared bash)
-> dprint --version
-...
-```
+For changes to the project setup, CI, or codebase structure, I update [kachick/dprint-plugin-typstyle](https://github.com/kachick/dprint-plugin-typstyle) first and then sync them across the other plugins.\
+This repository should follow its patterns.

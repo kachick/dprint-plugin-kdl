@@ -1,0 +1,27 @@
+{
+  "name": "@kachick/dprint-plugin-kdl",
+  "version": "0.4.0",
+  "description": "dprint plugin for KDL formatting using kdl",
+  "keywords": [
+    "kdl",
+    "formatter",
+    "dprint",
+    "dprint-plugin"
+  ],
+  "homepage": "https://github.com/kachick/dprint-plugin-kdl",
+  "bugs": {
+    "url": "https://github.com/kachick/dprint-plugin-kdl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kachick/dprint-plugin-kdl.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Kenichi Kamiya <kachick1@gmail.com>",
+  "files": [
+    "plugin.wasm",
+    "schema.json",
+    "LICENSE",
+    "README.md"
+  ]
+}

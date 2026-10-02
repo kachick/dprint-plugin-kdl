@@ -28,7 +28,7 @@ By default, it formats as KDL 2.0.
 }
 ```
 
-You can only consider KDL v1 documents, set `kdlVersion` option.
+If you only format KDL v1 documents, you can use the "kdlVersion" option:
 
 ```json
 {
@@ -38,7 +38,7 @@ You can only consider KDL v1 documents, set `kdlVersion` option.
 }
 ```
 
-### Monorepo has V1 and V2
+### Mixed v1 and v2 Files
 
 Some famous applications still use KDL v1 for now:
 
@@ -46,13 +46,18 @@ Some famous applications still use KDL v1 for now:
 - [niri](https://github.com/niri-wm/niri/issues/888)
 
 If your repository has mixed versions of KDL files,
-consider adding the version marker line to the top of your files:
+consider adding a version marker line to the top of your files:
 
 ```kdl
 /- kdl-version 1
 simplified_ui true
 ```
 
-This version marker is defined as an optional hint in the [KDL specification](https://kdl.dev/spec#compatibility).
-But very helpful to avoid the migration era problems.\
-When this line is on the first line, this plugin formats the file with that version, even if `kdlVersion` in `dprint.json` says otherwise.
+```kdl
+/- kdl-version 2
+simplified_ui #true
+```
+
+This version marker is defined as an optional hint in the [KDL specification](https://kdl.dev/spec#compatibility).\
+It is very helpful to avoid version issues during migration.\
+When placed on the first line, this plugin formats the file with that version, even if `kdlVersion` in `dprint.json` says otherwise.

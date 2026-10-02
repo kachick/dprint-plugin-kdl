@@ -73,6 +73,11 @@ fn get_test_dirs(repo_root: &Path, test_name: Option<&str>) -> Vec<PathBuf> {
 }
 
 fn run_check(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
+    if test_name.is_none() {
+        run_validate_fixtures(repo_root, plugin_path);
+        run_error_cases(repo_root, plugin_path);
+    }
+
     let test_dirs = get_test_dirs(repo_root, test_name);
 
     for dir in test_dirs {

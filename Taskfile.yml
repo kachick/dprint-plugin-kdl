@@ -39,11 +39,9 @@ tasks:
       - cargo test --workspace
   test-e2e:
     deps:
-      - test-e2e-validate-fixtures
-      - test-e2e-v2-official
-      - test-e2e-v1-zellij
-      - test-e2e-mixed-versions
-      - test-e2e-error-cases
+      - build
+    cmds:
+      - cargo run --package e2e -- check
   test-e2e-validate-fixtures:
     deps:
       - build
@@ -70,9 +68,9 @@ tasks:
       - cargo run --package e2e -- bump '{{.TESTNAME}}'
   bump-fixtures:
     deps:
-      - bump-fixtures-v2-official
-      - bump-fixtures-v1-zellij
-      - bump-fixtures-mixed-versions
+      - build
+    cmds:
+      - cargo run --package e2e -- bump
   fmt:
     cmds:
       - cargo fmt

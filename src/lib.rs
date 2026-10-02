@@ -433,6 +433,9 @@ mod tests {
         assert_eq!(detect_version_marker("node 1").unwrap(), None);
         assert_eq!(detect_version_marker("// comment\n/- kdl-version 1").unwrap(), None);
         assert_eq!(detect_version_marker("\n/- kdl-version 1").unwrap(), None);
+        assert_eq!(detect_version_marker("// regular comment").unwrap(), None);
+        assert_eq!(detect_version_marker("/* regular block comment */").unwrap(), None);
+        assert_eq!(detect_version_marker("/- other_node 1 2").unwrap(), None);
 
         // Unsupported version markers return FormatError
         let err_v3 = detect_version_marker("/- kdl-version 3").unwrap_err();
@@ -467,6 +470,70 @@ mod tests {
         assert_eq!(
             result.unwrap_err().to_string(),
             "Unsupported KDL version '3' in version marker. Supported versions are '1' and '2'."
+        );
+    }
+
+    #[test]
+    fn test_format_leading_regular_comment_uses_config_version() {
+        let mut handler = KdlPluginHandler;
+        let cancellation_token = NullCancellationToken;
+
+        // 1. Line comment `//` with config V1 -> formats as V1 (keeps quotes)
+        let v1_input = b"// regular line comment\nnode   key=\"value\"   flag=true\n".to_vec();
+        let config_v1 = Configuration {
+            kdl_version: KdlVersion::V1,
+        };
+        let request_v1 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v1_input,
+            config_id: FormatConfigId::from_raw(1),
+            config: &config_v1,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v1 = handler.format(request_v1, |_| unreachable!()).unwrap();
+        assert!(formatted_v1.is_some());
+        let formatted_str_v1 = String::from_utf8(formatted_v1.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str_v1,
+            "// regular line comment\nnode key=\"value\" flag=true\n"
+        );
+
+        // 2. Block comment `/* ... */` with default V2 -> formats as V2 (strips quotes)
+        let v2_input = b"/* regular block comment */\nnode   key=\"value\"   flag=#true\n".to_vec();
+        let config_v2 = Configuration::default();
+        let request_v2 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v2_input,
+            config_id: FormatConfigId::from_raw(2),
+            config: &config_v2,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v2 = handler.format(request_v2, |_| unreachable!()).unwrap();
+        assert!(formatted_v2.is_some());
+        let formatted_str_v2 = String::from_utf8(formatted_v2.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str_v2,
+            "/* regular block comment */\nnode key=value flag=#true\n"
+        );
+
+        // 3. Regular slashdash comment `/- node` with default V2 -> formats as V2
+        let slashdash_input = b"/-regular_node 1 2\nnode   key=\"value\"   flag=#true\n".to_vec();
+        let request_slashdash = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: slashdash_input,
+            config_id: FormatConfigId::from_raw(3),
+            config: &config_v2,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_slashdash = handler.format(request_slashdash, |_| unreachable!()).unwrap();
+        assert!(formatted_slashdash.is_some());
+        let formatted_str_slashdash = String::from_utf8(formatted_slashdash.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str_slashdash,
+            "/-regular_node 1 2\nnode key=value flag=#true\n"
         );
     }
 

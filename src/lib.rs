@@ -10,6 +10,14 @@ use kdl::KdlDocument;
 use schemars::{JsonSchema, schema_for};
 use serde::{Deserialize, Serialize};
 
+// Why no `auto` version or fallback parsing?
+// 1. Silent syntax changes: Many KDL v1 documents are valid KDL v2 syntax.
+//    If we try v2 first with fallback to v1, valid v1 documents (e.g. quoted strings)
+//    will succeed in v2 parsing and be reformatted with v2 rules (quotes removed),
+//    breaking tools that expect v1.
+// 2. Performance: Trying v2 and then v1 doubles the parsing time on errors.
+// 3. Clear alternatives: Users can set `kdlVersion` in config / overrides,
+//    or add `/- kdl-version 1` or `2` at the top of the file.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 pub enum KdlVersion {
@@ -74,6 +82,40 @@ pub fn generate_json_schema() -> String {
     serde_json::to_string_pretty(&schema).unwrap()
 }
 
+// The version marker detection logic is inspired by `kdl-rs` (src/document.rs).
+// Copyright 2020 Kat Marchán (Apache-2.0)
+// https://github.com/kdl-org/kdl-rs/blob/v6.7.1/src/document.rs
+//
+// In KDL specification, the optional version marker must appear at the very start
+// of the document (after an optional BOM): `/- kdl-version <1|2>`
+// https://kdl.dev/spec#compatibility
+fn detect_version_marker(text: &str) -> Result<Option<KdlVersion>, FormatError> {
+    let input = text.strip_prefix('\u{FEFF}').unwrap_or(text);
+    let Some(first_line) = input.lines().next() else {
+        return Ok(None);
+    };
+    let trimmed = first_line.trim_start();
+    let Some(rest) = trimmed.strip_prefix("/-") else {
+        return Ok(None);
+    };
+    let rest = rest.trim_start();
+    let Some(rest) = rest.strip_prefix("kdl-version") else {
+        return Ok(None);
+    };
+    let rest_trimmed = rest.trim_start();
+    if rest.len() == rest_trimmed.len() {
+        return Ok(None);
+    }
+    let version_str = rest_trimmed.trim();
+    match version_str {
+        "1" => Ok(Some(KdlVersion::V1)),
+        "2" => Ok(Some(KdlVersion::V2)),
+        _ => Err(FormatError::new(format!(
+            "Unsupported KDL version '{version_str}' in version marker. Supported versions are '1' and '2'."
+        ))),
+    }
+}
+
 #[derive(Default)]
 pub struct KdlPluginHandler;
 
@@ -127,8 +169,9 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
         }
 
         let text = std::str::from_utf8(&request.file_bytes)?;
+        let kdl_version = detect_version_marker(text)?.unwrap_or(request.config.kdl_version);
 
-        let result = match request.config.kdl_version {
+        let result = match kdl_version {
             KdlVersion::V1 => {
                 let mut doc: kdl_v1::KdlDocument = text
                     .parse::<kdl_v1::KdlDocument>()
@@ -353,5 +396,125 @@ mod tests {
         assert!(formatted_v2.is_some());
         let formatted_str_v2 = String::from_utf8(formatted_v2.unwrap()).unwrap();
         assert_eq!(formatted_str_v2, "node key=value flag=#true\n");
+    }
+
+    #[test]
+    fn test_v1_fixtures_fail_when_formatted_as_v2() {
+        let mut handler = KdlPluginHandler;
+        let cancellation_token = NullCancellationToken;
+        let config_v2 = Configuration {
+            kdl_version: KdlVersion::V2,
+        };
+
+        // Ensure tests/v1-zellij/raw.kdl is genuinely incompatible with v2 (contains `simplified_ui true`).
+        // See https://github.com/kachick/dprint-plugin-kdl/issues/225
+        let zellij_raw = include_bytes!("../tests/v1-zellij/raw.kdl");
+        let request_zellij = SyncFormatRequest {
+            file_path: &PathBuf::from("config.kdl"),
+            file_bytes: zellij_raw.to_vec(),
+            config_id: FormatConfigId::from_raw(1),
+            config: &config_v2,
+            range: None,
+            token: &cancellation_token,
+        };
+        assert!(handler.format(request_zellij, |_| unreachable!()).is_err());
+    }
+
+    #[test]
+    fn test_detect_version_marker() {
+        assert_eq!(detect_version_marker("/- kdl-version 1").unwrap(), Some(KdlVersion::V1));
+        assert_eq!(detect_version_marker("/- kdl-version 2").unwrap(), Some(KdlVersion::V2));
+        assert_eq!(detect_version_marker("/-kdl-version 1").unwrap(), Some(KdlVersion::V1));
+        assert_eq!(detect_version_marker("  /-   kdl-version   2  \nnode").unwrap(), Some(KdlVersion::V2));
+        assert_eq!(detect_version_marker("\u{FEFF}/- kdl-version 1\n").unwrap(), Some(KdlVersion::V1));
+
+        // Invalid or missing version markers (ignored as regular text)
+        assert_eq!(detect_version_marker("/- kdl-version1").unwrap(), None);
+        assert_eq!(detect_version_marker("node 1").unwrap(), None);
+        assert_eq!(detect_version_marker("// comment\n/- kdl-version 1").unwrap(), None);
+        assert_eq!(detect_version_marker("\n/- kdl-version 1").unwrap(), None);
+
+        // Unsupported version markers return FormatError
+        let err_v3 = detect_version_marker("/- kdl-version 3").unwrap_err();
+        assert_eq!(
+            err_v3.to_string(),
+            "Unsupported KDL version '3' in version marker. Supported versions are '1' and '2'."
+        );
+        let err_custom = detect_version_marker("/- kdl-version foo").unwrap_err();
+        assert_eq!(
+            err_custom.to_string(),
+            "Unsupported KDL version 'foo' in version marker. Supported versions are '1' and '2'."
+        );
+    }
+
+    #[test]
+    fn test_format_unsupported_version_marker_errors() {
+        let mut handler = KdlPluginHandler;
+        let cancellation_token = NullCancellationToken;
+
+        let v3_input = b"/- kdl-version 3\nnode \"foo\"\n".to_vec();
+        let config = Configuration::default();
+        let request = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v3_input,
+            config_id: FormatConfigId::from_raw(1),
+            config: &config,
+            range: None,
+            token: &cancellation_token,
+        };
+        let result = handler.format(request, |_| unreachable!());
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Unsupported KDL version '3' in version marker. Supported versions are '1' and '2'."
+        );
+    }
+
+    #[test]
+    fn test_format_overridden_by_version_marker() {
+        let mut handler = KdlPluginHandler;
+        let cancellation_token = NullCancellationToken;
+
+        // Config is V2, but file has `/- kdl-version 1` -> formats as V1 (keeps quotes)
+        let v1_input = b"/- kdl-version 1\nnode   key=\"value\"   flag=true\n".to_vec();
+        let config_v2 = Configuration {
+            kdl_version: KdlVersion::V2,
+        };
+        let request_v1 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v1_input,
+            config_id: FormatConfigId::from_raw(1),
+            config: &config_v2,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v1 = handler.format(request_v1, |_| unreachable!()).unwrap();
+        assert!(formatted_v1.is_some());
+        let formatted_str_v1 = String::from_utf8(formatted_v1.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str_v1,
+            "/- kdl-version 1\nnode key=\"value\" flag=true\n"
+        );
+
+        // Config is V1, but file has `/- kdl-version 2` -> formats as V2 (strips quotes)
+        let v2_input = b"/- kdl-version 2\nnode   key=\"value\"   flag=#true\n".to_vec();
+        let config_v1 = Configuration {
+            kdl_version: KdlVersion::V1,
+        };
+        let request_v2 = SyncFormatRequest {
+            file_path: &PathBuf::from("test.kdl"),
+            file_bytes: v2_input,
+            config_id: FormatConfigId::from_raw(2),
+            config: &config_v1,
+            range: None,
+            token: &cancellation_token,
+        };
+        let formatted_v2 = handler.format(request_v2, |_| unreachable!()).unwrap();
+        assert!(formatted_v2.is_some());
+        let formatted_str_v2 = String::from_utf8(formatted_v2.unwrap()).unwrap();
+        assert_eq!(
+            formatted_str_v2,
+            "/- kdl-version 2\nnode key=value flag=#true\n"
+        );
     }
 }

@@ -39,29 +39,55 @@ tasks:
       - cargo test --workspace
   test-e2e:
     deps:
-      - test-e2e-official
-      - test-e2e-zellij
-      - test-e2e-zellij-v1
+      - test-e2e-v2-official
+      - test-e2e-v1-zellij
+      - test-e2e-mixed-versions
+      - test-e2e-error-cases
+  test-e2e-error-cases:
+    deps:
+      - build
+    cmds:
+      - |
+        if dprint fmt --stdin test.kdl --plugins="$PLUGIN_PATH" < tests/v1-zellij/raw.kdl 2>/dev/null; then
+          echo "Expected v1 syntax to fail under v2, but it succeeded" >&2
+          exit 1
+        fi
+        if printf "/- kdl-version 3\nnode 1\n" | dprint fmt --stdin test.kdl --plugins="$PLUGIN_PATH" 2>/dev/null; then
+          echo "Expected unsupported version 3 to fail, but it succeeded" >&2
+          exit 1
+        fi
   test-e2e-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && dprint check --plugins="$PLUGIN_PATH" expected.kdl
-      - cd 'tests/{{.TESTNAME}}' && diff <(cat raw.kdl | dprint fmt --stdin raw.kdl --plugins="$PLUGIN_PATH") expected.kdl
+      - |
+        cd 'tests/{{.TESTNAME}}'
+        for expected in *expected*.kdl; do
+          dprint check --plugins="$PLUGIN_PATH" "$expected"
+        done
+        for raw in *raw*.kdl; do
+          expected="${raw//raw/expected}"
+          diff <(cat "$raw" | dprint fmt --stdin "$raw" --plugins="$PLUGIN_PATH") "$expected"
+        done
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - cd 'tests/{{.TESTNAME}}' && cat raw.kdl | dprint fmt --stdin raw.kdl --plugins="$PLUGIN_PATH" > expected.kdl
+      - |
+        cd 'tests/{{.TESTNAME}}'
+        for raw in *raw*.kdl; do
+          expected="${raw//raw/expected}"
+          cat "$raw" | dprint fmt --stdin "$raw" --plugins="$PLUGIN_PATH" > "$expected"
+        done
   bump-fixtures:
     deps:
-      - bump-fixtures-official
-      - bump-fixtures-zellij
-      - bump-fixtures-zellij-v1
+      - bump-fixtures-v2-official
+      - bump-fixtures-v1-zellij
+      - bump-fixtures-mixed-versions
   fmt:
     cmds:
       - cargo fmt

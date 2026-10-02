@@ -1,3 +1,5 @@
+// Keep `true` to ensure KDL v1 boolean syntax fails under v2: https://github.com/kachick/dprint-plugin-kdl/issues/225
+simplified_ui true
 default_mode "locked"
 keybinds {
     shared_except "locked" {

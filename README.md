@@ -38,8 +38,7 @@ Some famous applications still use KDL v1 for now:
 - [Zellij](https://github.com/zellij-org/zellij/issues/3891)
 - [niri](https://github.com/niri-wm/niri/issues/888)
 
-If your repository has mixed versions of KDL files,
-consider adding a version marker line to the top of your files:
+If your repository has mixed versions of KDL files, consider adding a version marker line to the top of your files:
 
 ```kdl
 /- kdl-version 1
@@ -52,5 +51,5 @@ simplified_ui #true
 ```
 
 This version marker is defined as an optional hint in the [KDL specification](https://kdl.dev/spec#compatibility).\
-It is very helpful to avoid version issues during migration.\
-When placed on the first line, this plugin formats the file with that version, even if `kdlVersion` in `dprint.json` says otherwise.
+When placed on the first line, this plugin formats the file with that version,\
+even if `kdlVersion` in `dprint.json` says otherwise.

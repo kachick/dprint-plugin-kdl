@@ -1,2 +1,5 @@
 dprint-plugin-kdl
 Copyright 2024 Kenichi Kamiya
+
+This product includes code derived from kdl-rs (version marker detection):
+Copyright 2020 Kat Marchán

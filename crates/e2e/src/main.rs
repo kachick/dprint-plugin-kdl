@@ -6,7 +6,9 @@ use std::process::{Command, Stdio};
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: cargo run --package e2e -- <check|bump|validate-fixtures|error-cases> [test_name]");
+        eprintln!(
+            "Usage: cargo run --package e2e -- <check|bump|validate-fixtures|error-cases> [test_name]"
+        );
         std::process::exit(1);
     }
 
@@ -19,9 +21,11 @@ fn main() {
         .expect("Failed to find repo root")
         .to_path_buf();
 
-    let plugin_path = std::env::var("PLUGIN_PATH").map(PathBuf::from).unwrap_or_else(|_| {
-        repo_root.join("target/wasm32-unknown-unknown/debug/dprint_plugin_kdl.wasm")
-    });
+    let plugin_path = std::env::var("PLUGIN_PATH")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| {
+            repo_root.join("target/wasm32-unknown-unknown/debug/dprint_plugin_kdl.wasm")
+        });
 
     if !plugin_path.exists() {
         eprintln!(
@@ -125,7 +129,9 @@ fn run_check(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
                         .expect("Failed to write to stdin");
                 }
 
-                let output = child.wait_with_output().expect("Failed to read dprint output");
+                let output = child
+                    .wait_with_output()
+                    .expect("Failed to read dprint output");
                 if !output.status.success() {
                     eprintln!("dprint fmt failed for {}", raw_path.display());
                     std::process::exit(1);
@@ -134,7 +140,10 @@ fn run_check(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
                 let actual_content =
                     String::from_utf8(output.stdout).expect("Output is not valid UTF-8");
                 if actual_content != expected_content {
-                    eprintln!("Difference detected between formatted output and {}", expected_path.display());
+                    eprintln!(
+                        "Difference detected between formatted output and {}",
+                        expected_path.display()
+                    );
                     print_diff(&expected_path, &actual_content);
                     std::process::exit(1);
                 }
@@ -176,7 +185,9 @@ fn run_bump(repo_root: &Path, plugin_path: &Path, test_name: Option<&str>) {
                         .expect("Failed to write to stdin");
                 }
 
-                let output = child.wait_with_output().expect("Failed to read dprint output");
+                let output = child
+                    .wait_with_output()
+                    .expect("Failed to read dprint output");
                 if !output.status.success() {
                     eprintln!("dprint fmt failed for {}", raw_path.display());
                     std::process::exit(1);

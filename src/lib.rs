@@ -422,19 +422,40 @@ mod tests {
 
     #[test]
     fn test_detect_version_marker() {
-        assert_eq!(detect_version_marker("/- kdl-version 1").unwrap(), Some(KdlVersion::V1));
-        assert_eq!(detect_version_marker("/- kdl-version 2").unwrap(), Some(KdlVersion::V2));
-        assert_eq!(detect_version_marker("/-kdl-version 1").unwrap(), Some(KdlVersion::V1));
-        assert_eq!(detect_version_marker("  /-   kdl-version   2  \nnode").unwrap(), Some(KdlVersion::V2));
-        assert_eq!(detect_version_marker("\u{FEFF}/- kdl-version 1\n").unwrap(), Some(KdlVersion::V1));
+        assert_eq!(
+            detect_version_marker("/- kdl-version 1").unwrap(),
+            Some(KdlVersion::V1)
+        );
+        assert_eq!(
+            detect_version_marker("/- kdl-version 2").unwrap(),
+            Some(KdlVersion::V2)
+        );
+        assert_eq!(
+            detect_version_marker("/-kdl-version 1").unwrap(),
+            Some(KdlVersion::V1)
+        );
+        assert_eq!(
+            detect_version_marker("  /-   kdl-version   2  \nnode").unwrap(),
+            Some(KdlVersion::V2)
+        );
+        assert_eq!(
+            detect_version_marker("\u{FEFF}/- kdl-version 1\n").unwrap(),
+            Some(KdlVersion::V1)
+        );
 
         // Invalid or missing version markers (ignored as regular text)
         assert_eq!(detect_version_marker("/- kdl-version1").unwrap(), None);
         assert_eq!(detect_version_marker("node 1").unwrap(), None);
-        assert_eq!(detect_version_marker("// comment\n/- kdl-version 1").unwrap(), None);
+        assert_eq!(
+            detect_version_marker("// comment\n/- kdl-version 1").unwrap(),
+            None
+        );
         assert_eq!(detect_version_marker("\n/- kdl-version 1").unwrap(), None);
         assert_eq!(detect_version_marker("// regular comment").unwrap(), None);
-        assert_eq!(detect_version_marker("/* regular block comment */").unwrap(), None);
+        assert_eq!(
+            detect_version_marker("/* regular block comment */").unwrap(),
+            None
+        );
         assert_eq!(detect_version_marker("/- other_node 1 2").unwrap(), None);
 
         // Unsupported version markers return FormatError
@@ -528,7 +549,9 @@ mod tests {
             range: None,
             token: &cancellation_token,
         };
-        let formatted_slashdash = handler.format(request_slashdash, |_| unreachable!()).unwrap();
+        let formatted_slashdash = handler
+            .format(request_slashdash, |_| unreachable!())
+            .unwrap();
         assert!(formatted_slashdash.is_some());
         let formatted_str_slashdash = String::from_utf8(formatted_slashdash.unwrap()).unwrap();
         assert_eq!(

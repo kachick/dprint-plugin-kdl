@@ -28,7 +28,7 @@ By default, it formats as KDL 2.0.
 }
 ```
 
-To format KDL v1 documents, set `"kdlVersion": "v1"`.
+You can only consider KDL v1 documents, set `kdlVersion` option.
 
 ```json
 {
@@ -38,23 +38,21 @@ To format KDL v1 documents, set `"kdlVersion": "v1"`.
 }
 ```
 
+### Monorepo has V1 and V2
+
 Some famous applications still use KDL v1 for now:
 
 - [Zellij](https://github.com/zellij-org/zellij/issues/3891)
 - [niri](https://github.com/niri-wm/niri/issues/888)
 
-If your repository has mixed versions of KDL files (for example, dotfiles with Zellij or niri configs),
-we recommend adding an optional version marker line to the top of your KDL files:
+If your repository has mixed versions of KDL files,
+consider adding the version marker line to the top of your files:
 
 ```kdl
 /- kdl-version 1
+simplified_ui true
 ```
 
 This version marker is defined as an optional hint in the [KDL specification](https://kdl.dev/spec#compatibility).
+But very helpful to avoid the migration era problems.\
 When this line is on the first line, this plugin formats the file with that version, even if `kdlVersion` in `dprint.json` says otherwise.
-
-You can also use dprint's [`overrides`](https://dprint.dev/config/#overrides) to set `"kdlVersion": "v1"` for specific file paths.
-
-## Link
-
-<https://github.com/kdl-org/kdl/issues/393>

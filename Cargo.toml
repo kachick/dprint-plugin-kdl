@@ -14,7 +14,7 @@ description = "dprint plugin for KDL formatting using kdl"
 schema = ["dep:schemars"]
 
 [dependencies]
-dprint-core = { version = "0.69.1", features = ["wasm"] }
+dprint-core = { version = "0.70.0", features = ["wasm"] }
 kdl = "6.7.1"
 # Although kdl 6.x provides an optional "v1" feature, it converts the AST into v2 representation
 # (e.g. autoformatting outputs #true instead of true, and strips quotes from strings).

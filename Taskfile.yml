@@ -39,10 +39,16 @@ tasks:
       - cargo test --workspace
   test-e2e:
     deps:
+      - test-e2e-validate-fixtures
       - test-e2e-v2-official
       - test-e2e-v1-zellij
       - test-e2e-mixed-versions
       - test-e2e-error-cases
+  test-e2e-validate-fixtures:
+    deps:
+      - build
+    cmds:
+      - ./scripts/e2e.bash validate-fixtures
   test-e2e-error-cases:
     deps:
       - build

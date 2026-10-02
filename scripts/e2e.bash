@@ -27,12 +27,16 @@ case "${action}" in
     done
     ;;
   error-cases)
-    if dprint fmt --stdin test.kdl --plugins="${PLUGIN_PATH}" < "${repo_root}/tests/v1-zellij/raw.kdl" 2>/dev/null; then
-      echo "Expected v1 syntax to fail under v2, but it succeeded" >&2
-      exit 1
-    fi
     if printf "/- kdl-version 3\nnode 1\n" | dprint fmt --stdin test.kdl --plugins="${PLUGIN_PATH}" 2>/dev/null; then
       echo "Expected unsupported version 3 to fail, but it succeeded" >&2
+      exit 1
+    fi
+    ;;
+  validate-fixtures|validate-fixture)
+    # Ensure tests/v1-zellij/raw.kdl is genuinely incompatible with v2 (contains `simplified_ui true`).
+    # See https://github.com/kachick/dprint-plugin-kdl/issues/225
+    if dprint fmt --stdin test.kdl --plugins="${PLUGIN_PATH}" < "${repo_root}/tests/v1-zellij/raw.kdl" 2>/dev/null; then
+      echo "Expected v1 fixture (tests/v1-zellij/raw.kdl) to fail under v2, but it succeeded" >&2
       exit 1
     fi
     ;;

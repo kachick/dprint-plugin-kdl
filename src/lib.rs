@@ -399,25 +399,25 @@ mod tests {
     }
 
     #[test]
-    fn test_v1_fixtures_fail_when_formatted_as_v2() {
+    fn test_v1_syntax_fails_when_formatted_as_v2() {
         let mut handler = KdlPluginHandler;
         let cancellation_token = NullCancellationToken;
         let config_v2 = Configuration {
             kdl_version: KdlVersion::V2,
         };
 
-        // Ensure tests/v1-zellij/raw.kdl is genuinely incompatible with v2 (contains `simplified_ui true`).
+        // Ensure KDL v1 boolean syntax fails under v2 (boolean values without `#` prefix).
         // See https://github.com/kachick/dprint-plugin-kdl/issues/225
-        let zellij_raw = include_bytes!("../tests/v1-zellij/raw.kdl");
-        let request_zellij = SyncFormatRequest {
+        let v1_input = b"simplified_ui true\n".to_vec();
+        let request = SyncFormatRequest {
             file_path: &PathBuf::from("config.kdl"),
-            file_bytes: zellij_raw.to_vec(),
+            file_bytes: v1_input,
             config_id: FormatConfigId::from_raw(1),
             config: &config_v2,
             range: None,
             token: &cancellation_token,
         };
-        assert!(handler.format(request_zellij, |_| unreachable!()).is_err());
+        assert!(handler.format(request, |_| unreachable!()).is_err());
     }
 
     #[test]

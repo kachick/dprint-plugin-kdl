@@ -48,26 +48,26 @@ tasks:
     deps:
       - build
     cmds:
-      - ./scripts/e2e.bash validate-fixtures
+      - cargo run --package e2e -- validate-fixtures
   test-e2e-error-cases:
     deps:
       - build
     cmds:
-      - ./scripts/e2e.bash error-cases
+      - cargo run --package e2e -- error-cases
   test-e2e-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - ./scripts/e2e.bash check '{{.TESTNAME}}'
+      - cargo run --package e2e -- check '{{.TESTNAME}}'
   bump-fixtures-*:
     deps:
       - build
     vars:
       TESTNAME: '{{index .MATCH 0}}'
     cmds:
-      - ./scripts/e2e.bash bump '{{.TESTNAME}}'
+      - cargo run --package e2e -- bump '{{.TESTNAME}}'
   bump-fixtures:
     deps:
       - bump-fixtures-v2-official

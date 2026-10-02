@@ -112,6 +112,7 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
             file_matching: FileMatchingInfo {
                 file_extensions: vec!["kdl".to_string()],
                 file_names: vec![],
+                additive: false,
             },
         }
     }

@@ -14,8 +14,8 @@ An internal runner for End-to-End (E2E) testing and fixture updating.
 3. **Fixture updating (`bump`)**:
    - This tool also updates expected files (`bump`). Standard `#[test]` does not support updating fixtures.
 
-Therefore, we keep this runner as a workspace tool and run it via Taskfile:
-`task build` -> `task test-e2e`.
+Therefore, we keep this runner as a workspace tool and run it via xtask:
+`cargo x build` -> `cargo x test-e2e`.
 
 ## Usage
 
@@ -29,7 +29,6 @@ cargo run --package e2e -- check v2-official
 # Update all expected fixture files
 cargo run --package e2e -- bump
 
-# Validate fixture and error cases
-cargo run --package e2e -- validate-fixtures
-cargo run --package e2e -- error-cases
+# Update a specific fixture file
+cargo run --package e2e -- bump v2-official
 ```

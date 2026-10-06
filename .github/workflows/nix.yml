@@ -14,7 +14,6 @@ on:
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'Taskfile.yml'
   pull_request:
     paths:
       - '.github/workflows/nix.yml'
@@ -23,7 +22,6 @@ on:
       - 'flake.*'
       - '**.rs'
       - 'Cargo.*'
-      - 'Taskfile.yml'
   schedule:
     # Every 10:42 JST
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule

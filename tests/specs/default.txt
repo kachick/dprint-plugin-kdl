@@ -1,0 +1,21 @@
+== formats basic node ==
+node   key="value"
+
+[expect]
+node key=value
+
+== formats boolean with hash prefix ==
+node   flag=#true
+
+[expect]
+node flag=#true
+
+== formats children block ==
+parent {
+child   1
+}
+
+[expect]
+parent {
+    child 1
+}

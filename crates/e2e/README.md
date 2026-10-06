@@ -17,6 +17,21 @@ An internal runner for End-to-End (E2E) testing and fixture updating.
 Therefore, we keep this runner as a workspace tool and run it via xtask:
 `cargo x build` -> `cargo x test-e2e`.
 
+## Scope and test strategy
+
+E2E tests serve as minimal integration smoke tests to ensure built Wasm binaries
+run correctly inside the `dprint` CLI:
+
+- `tests/v2-official`: Verifies baseline KDL v2 formatting (default).
+- `tests/v1-zellij`: Verifies KDL v1 formatting via plugin configuration.
+- `tests/mixed-versions`: Verifies mixed KDL versions formatted in the same project via version markers.
+
+The `dprint check` step in each test naturally verifies that fixture `dprint.json`
+files conform to plugin and CLI expectations.
+
+Configuration option variations and edge cases are covered by spec tests in `tests/specs/`
+(run via `cargo test`) to keep E2E fixtures lightweight and avoid frequent bump churn.
+
 ## Usage
 
 ```sh

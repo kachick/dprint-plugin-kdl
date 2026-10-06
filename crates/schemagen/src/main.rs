@@ -4,6 +4,12 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    // Tests here verify that the generated schema.json is a valid JSON Schema
+    // and enforces the expected property constraints (defaults, enums, additionalProperties).
+    //
+    // We intentionally avoid depending on external E2E test fixtures (e.g. tests/*/dprint.json)
+    // here. Real fixture files are naturally validated by the dprint CLI during E2E runs
+    // via `dprint check`, keeping this schema generator test self-contained.
     #[test]
     fn test_generate_json_schema() {
         let schema = include_str!(concat!(env!("OUT_DIR"), "/schema.json"));

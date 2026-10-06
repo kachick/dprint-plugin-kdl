@@ -608,3 +608,6 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod spec_test;

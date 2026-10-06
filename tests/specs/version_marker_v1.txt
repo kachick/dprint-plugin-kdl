@@ -1,0 +1,8 @@
+~~ kdlVersion: v1 ~~
+== version marker 2 overrides v1 config to v2 ==
+/- kdl-version 2
+node   key="value"   flag=#true
+
+[expect]
+/- kdl-version 2
+node key=value flag=#true

@@ -1,0 +1,22 @@
+~~ kdlVersion: v1 ~~
+== preserves string quotes in v1 ==
+node   key="value"
+
+[expect]
+node key="value"
+
+== formats boolean without hash prefix in v1 ==
+node   flag=true
+
+[expect]
+node flag=true
+
+== formats children block in v1 ==
+parent {
+child   1
+}
+
+[expect]
+parent {
+    child 1
+}

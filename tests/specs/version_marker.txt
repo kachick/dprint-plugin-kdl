@@ -1,0 +1,15 @@
+== version marker 1 overrides default v2 to v1 ==
+/- kdl-version 1
+node   key="value"   flag=true
+
+[expect]
+/- kdl-version 1
+node key="value" flag=true
+
+== version marker 2 preserves v2 in default ==
+/- kdl-version 2
+node   key="value"   flag=#true
+
+[expect]
+/- kdl-version 2
+node key=value flag=#true

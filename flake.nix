@@ -49,7 +49,6 @@
               findutils # xargs
               diffutils # for E2E test
               nixd
-              go-task
               typos
               zizmor
 

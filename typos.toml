@@ -15,7 +15,5 @@ extend-ignore-words-re = [
   "\\A[a-zA-Z]{1,3}\\z",
 ]
 
-[files]
-extend-exclude = [
-  "go.mod",
-]
+[default.extend-identifiers]
+WASM = "Wasm"

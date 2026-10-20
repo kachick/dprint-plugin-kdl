@@ -1,0 +1,29 @@
+{
+  "name": "@dprint/kdl",
+  "version": "0.0.0",
+  "description": "Wasm buffer for dprint-plugin-kdl.",
+  "keywords": [
+    "kdl",
+    "code",
+    "formatter",
+    "dprint"
+  ],
+  "homepage": "https://github.com/dprint/dprint-plugin-kdl#readme",
+  "bugs": {
+    "url": "https://github.com/dprint/dprint-plugin-kdl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dprint/dprint-plugin-kdl.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Kenichi Kamiya",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "test": "node index.test.js"
+  },
+  "devDependencies": {
+    "@dprint/formatter": "~0.4.0"
+  }
+}

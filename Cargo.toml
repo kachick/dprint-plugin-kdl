@@ -3,50 +3,16 @@ name = "dprint-plugin-kdl"
 version = "0.4.2"
 authors = ["Kenichi Kamiya <kachick1@gmail.com>"]
 edition = "2024"
+homepage = "https://github.com/dprint/dprint-plugin-kdl"
+keywords = ["formatting", "formatter", "kdl"]
 license = "Apache-2.0"
 publish = false
-repository = "https://github.com/kachick/dprint-plugin-kdl"
-description = "dprint plugin for KDL formatting using kdl"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[features]
-schema = ["dep:schemars"]
-
-[dependencies]
-dprint-core = { version = "0.71.0", features = ["wasm"] }
-kdl = "6.7.1"
-# Although kdl 6.x provides an optional "v1" feature, it converts the AST into v2 representation
-# (e.g. autoformatting outputs #true instead of true, and strips quotes from strings).
-# We intentionally depend directly on kdl 4.x to provide genuine, stable KDL v1 formatting.
-# See: https://github.com/kdl-org/kdl-rs/blob/v6.7.1/Cargo.toml#L18-L28
-kdl-v1 = { package = "kdl", version = "4.7.1" }
-schemars = { version = "1.2.3", optional = true }
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = { version = "1.0.154", features = ["preserve_order"] }
-
-[dev-dependencies]
-dprint-development = "0.12.1"
+repository = "https://github.com/dprint/dprint-plugin-kdl"
+description = "KDL formatter for dprint via kdl-rs."
 
 [lib]
 crate-type = ["lib", "cdylib"]
-# Distributed only as a dprint WASM plugin with no public Rust API
-doctest = false
 
-[workspace]
-resolver = "2"
-members = [
-  "crates/e2e",
-  "crates/schemagen",
-  "crates/sync-pkg-json",
-  "crates/xtask",
-]
-
-# Optimization matching official dprint plugins.
-# Do not use `wasm-opt`:
-# 1. Official dprint plugins do not use wasm-opt in their build pipelines.
-# 2. Historically, wasm-opt caused crashes (https://github.com/dprint/dprint/issues/79).
-# 3. rustc release profile with LTO is enough for wasmtime execution.
 [profile.release]
 opt-level = 3
 debug = false
@@ -54,3 +20,22 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
+
+[features]
+wasm = ["serde_json", "dprint-core/wasm"]
+
+[dependencies]
+dprint-core = { version = "0.71.0", default-features = false }
+kdl = "6.7.1"
+# Although kdl 6.x provides an optional "v1" feature, it converts the AST into v2 representation
+# (e.g. autoformatting outputs #true instead of true, and strips quotes from strings).
+# We intentionally depend directly on kdl 4.x to provide genuine, stable KDL v1 formatting.
+# See: https://github.com/kdl-org/kdl-rs/blob/v6.7.1/Cargo.toml#L18-L28
+kdl-v1 = { package = "kdl", version = "4.7.1" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", optional = true }
+thiserror = "2"
+
+[dev-dependencies]
+dprint-development = "0.12.1"
+serde_json = "1.0.154"

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-kdl/0.0.0/schema.json",
+  "type": "object",
+  "properties": {
+    "kdlVersion": {
+      "description": "The version of KDL to format the files as. A `/- kdl-version 1` or `/- kdl-version 2` marker on the first line of a file takes precedence.",
+      "type": "string",
+      "default": "v2",
+      "oneOf": [{
+        "const": "v1",
+        "description": "KDL 1.0."
+      }, {
+        "const": "v2",
+        "description": "KDL 2.0."
+      }]
+    }
+  }
+}

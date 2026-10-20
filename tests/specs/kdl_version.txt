@@ -20,3 +20,37 @@ child   1
 parent {
     child 1
 }
+
+== keeps a leading line comment in v1 ==
+// regular line comment
+node   key="value"   flag=true
+
+[expect]
+// regular line comment
+node key="value" flag=true
+
+== formats a document in v1 ==
+// Keep `true` to ensure KDL v1 boolean syntax fails under v2: https://github.com/kachick/dprint-plugin-kdl/issues/225
+simplified_ui   true
+default_mode    "locked"
+  keybinds {
+    shared_except "locked" {
+      bind "Alt q" {
+        Quit
+         }
+      unbind "Ctrl q"   // conflict with micro
+  }
+}
+
+[expect]
+// Keep `true` to ensure KDL v1 boolean syntax fails under v2: https://github.com/kachick/dprint-plugin-kdl/issues/225
+simplified_ui true
+default_mode "locked"
+keybinds {
+    shared_except "locked" {
+        bind "Alt q" {
+            Quit
+        }
+        unbind "Ctrl q" // conflict with micro
+    }
+}

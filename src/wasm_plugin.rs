@@ -45,7 +45,7 @@ impl SyncPluginHandler<Configuration> for KdlPluginHandler {
       name: env!("CARGO_PKG_NAME").to_string(),
       version: version.clone(),
       config_key: "kdl".to_string(),
-      help_url: "https://github.com/dprint/dprint-plugin-kdl".to_string(),
+      help_url: "https://dprint.dev/plugins/kdl".to_string(),
       config_schema_url: format!(
         "https://plugins.dprint.dev/dprint/dprint-plugin-kdl/{}/schema.json",
         version

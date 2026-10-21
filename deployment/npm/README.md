@@ -12,5 +12,8 @@ import { getBuffer } from "@dprint/kdl";
 
 const formatter = createFromBuffer(getBuffer());
 
-console.log(formatter.formatText("file.kdl", "node   key=\"value\""));
+console.log(formatter.formatText({
+  filePath: "file.kdl",
+  fileText: "node   key=\"value\"",
+}));
 ```
